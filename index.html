@@ -260,42 +260,15 @@
     <script>
         const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7'];
 
-        // 4 Destinies/Mechanisms of Chance
-        const fateTwists = [
-            (teams) => {
-                const index = Math.floor(Math.random() * teams.length);
-                return { twist: "⚡ Fate Twist: Pure Random Luck Strike!", winner: teams[index], index };
-            },
-            (teams) => {
-                let highestIdx = 0;
-                for (let i = 1; i < teams.length; i++) {
-                    if (teams[i].wager > teams[highestIdx].wager) highestIdx = i;
-                }
-                return { twist: "💰 Fate Twist: High Roller Payoff (Highest Wager Wins)!", winner: teams[highestIdx], index: highestIdx };
-            },
-            (teams) => {
-                let lowestIdx = 0;
-                for (let i = 1; i < teams.length; i++) {
-                    if (teams[i].points < teams[lowestIdx].points) lowestIdx = i;
-                }
-                return { twist: "🛡️ Fate Twist: Underdog Upset (Lowest Points Wins)!", winner: teams[lowestIdx], index: lowestIdx };
-            },
-            (teams) => {
-                let totalPoints = teams.reduce((sum, t) => sum + t.points, 0);
-                let randomVal = Math.random() * (totalPoints || 4);
-                let currentSum = 0;
-                let winnerIdx = 0;
-                
-                for (let i = 0; i < teams.length; i++) {
-                    currentSum += (teams[i].points > 0 ? teams[i].points : 1);
-                    if (randomVal <= currentSum) {
-                        winnerIdx = i;
-                        break;
-                    }
-                }
-                return { twist: "⚖️ Fate Twist: Momentum Shift (Point-Weighted Lottery)!", winner: teams[winnerIdx], index: winnerIdx };
-            }
-        ];
+        // Single Method of Chance: Pure Random Luck Strike
+        function selectWinner(teams) {
+            const index = Math.floor(Math.random() * teams.length);
+            return {
+                twist: "⚡ Fate Twist: Pure Random Luck Strike!",
+                winner: teams[index],
+                index: index
+            };
+        }
 
         // Initialize 4 blank input rows with unique team colors
         function renderInputs() {
@@ -342,9 +315,8 @@
                 await new Promise(r => setTimeout(r, 400));
             }
 
-            // Pick a random fate mechanism out of the 4
-            const selectedTwistFunction = fateTwists[Math.floor(Math.random() * fateTwists.length)];
-            const result = selectedTwistFunction(teams);
+            // Get the winner using the single selection method
+            const result = selectWinner(teams);
             const winnerTeam = result.winner;
 
             // Set dynamic gradient colors based on winner
