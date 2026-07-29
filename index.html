@@ -277,6 +277,47 @@
             z-index: 10;
         }
 
+        /* 3D Dice Styles */
+        .dice-scene {
+            width: 100px;
+            height: 100px;
+            perspective: 600px;
+            margin: 25px auto;
+            display: none;
+        }
+
+        .dice-cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.15, 0.85, 0.15, 1);
+        }
+
+        .dice-face {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: #f8fafc;
+            color: #0f172a;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Cube face placement */
+        .dice-face-1 { transform: rotateY(0deg) translateZ(50px); }
+        .dice-face-6 { transform: rotateY(180deg) translateZ(50px); }
+        .dice-face-2 { transform: rotateY(-90deg) translateZ(50px); }
+        .dice-face-5 { transform: rotateY(90deg) translateZ(50px); }
+        .dice-face-3 { transform: rotateX(90deg) translateZ(50px); }
+        .dice-face-4 { transform: rotateX(-90deg) translateZ(50px); }
+
         .results-section {
             margin-top: 30px;
             border-top: 1px solid var(--border);
@@ -428,6 +469,7 @@
 
             <button class="btn" id="actionBtn" onclick="runShowdown()">Spin the Wheel!</button>
 
+            <!-- Spinning Wheel Element -->
             <div class="spinner-container" id="spinnerContainer">
                 <div class="spinner-pointer"></div>
                 <div class="spinner-wheel" id="spinnerWheel">
@@ -435,6 +477,18 @@
                     <div class="wheel-slice slice-1"><div class="slice-content" id="slice-text-1">Team 2</div></div>
                     <div class="wheel-slice slice-2"><div class="slice-content" id="slice-text-2">Team 3</div></div>
                     <div class="wheel-slice slice-3"><div class="slice-content" id="slice-text-3">Team 4</div></div>
+                </div>
+            </div>
+
+            <!-- 3D Dice Element -->
+            <div class="dice-scene" id="diceScene">
+                <div class="dice-cube" id="diceCube">
+                    <div class="dice-face dice-face-1">1</div>
+                    <div class="dice-face dice-face-2">2</div>
+                    <div class="dice-face dice-face-3">3</div>
+                    <div class="dice-face dice-face-4">4</div>
+                    <div class="dice-face dice-face-5">5</div>
+                    <div class="dice-face dice-face-6">6</div>
                 </div>
             </div>
 
@@ -464,6 +518,7 @@
             document.getElementById('mainScreen').style.display='block';
 
             const spinnerContainer = document.getElementById('spinnerContainer');
+            const diceScene = document.getElementById('diceScene');
             const actionBtn = document.getElementById('actionBtn');
             const screenTitle = document.getElementById('screenTitle');
             const screenSubtitle = document.getElementById('screenSubtitle');
@@ -471,12 +526,14 @@
 
             if (mode === 'spinner') {
                 spinnerContainer.style.display = 'block';
+                diceScene.style.display = 'none';
                 actionBtn.textContent = 'Spin the Wheel!';
                 screenTitle.textContent = 'Team Wager Showdown';
                 screenSubtitle.textContent = 'Enter your teams, current stats, and spin the wheel to decide the champion!';
                 headerExtra.style.display = 'none';
             } else if (mode === 'dice') {
                 spinnerContainer.style.display = 'none';
+                diceScene.style.display = 'block';
                 actionBtn.textContent = 'Roll the Dice!';
                 screenTitle.textContent = 'Mystery Roll Showdown';
                 screenSubtitle.textContent = 'Enter your teams, choose each team\'s target dice side, and roll to win!';
@@ -494,6 +551,7 @@
             document.getElementById('winnerBanner').style.display = 'none';
             document.getElementById('scoreboard').style.display = 'none';
             document.getElementById('spinnerContainer').style.display = 'none';
+            document.getElementById('diceScene').style.display = 'none';
             document.getElementById('fateDisplay').textContent = "Ready...";
         }
 
@@ -594,11 +652,31 @@
 
             } else if (selectedGameMode === 'dice') {
                 const rolledSide = Math.floor(Math.random() * 6) + 1;
-                fateDisplay.textContent = `🎲 The dice rolled a ${rolledSide}! Checking team predictions...`;
+                fateDisplay.textContent = "🎲 Rolling the 3D dice...";
+
+                // Map faces to required rotation angles to display the correct side on front
+                const rotations = {
+                    1: { x: 0, y: 0 },
+                    2: { x: 0, y: 90 },
+                    3: { x: -90, y: 0 },
+                    4: { x: 90, y: 0 },
+                    5: { x: 0, y: -90 },
+                    6: { x: 0, y: 180 }
+                };
+
+                // Add extra full tumbles (e.g. 360deg * 3) for realistic rolling motion
+                const randomTumblesX = (Math.floor(Math.random() * 3) + 3) * 360;
+                const randomTumblesY = (Math.floor(Math.random() * 3) + 3) * 360;
+
+                const targetX = randomTumblesX + rotations[rolledSide].x;
+                const targetY = randomTumblesY + rotations[rolledSide].y;
+
+                const diceCube = document.getElementById('diceCube');
+                diceCube.style.transform = `rotateX(${targetX}deg) rotateY(${targetY}deg)`;
 
                 setTimeout(() => {
                     finalizeDiceResults(teams, rolledSide);
-                }, 1500);
+                }, 1600);
             }
         }
 
