@@ -43,6 +43,14 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
         h1 {
             text-align: center;
             margin-bottom: 8px;
@@ -70,6 +78,51 @@
             color: var(--text-main);
             display: block;
             margin-bottom: 4px;
+        }
+
+        /* Selection Screen Styles */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .mode-card {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-card:hover {
+            border-color: var(--team-0);
+            transform: translateY(-2px);
+        }
+
+        .mode-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .mode-card.disabled:hover {
+            border-color: var(--border);
+            transform: none;
+        }
+
+        .mode-card h3 {
+            margin-top: 0;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .mode-card p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
         }
 
         .team-grid {
@@ -156,7 +209,6 @@
             border: 6px solid var(--border);
             position: relative;
             overflow: hidden;
-            /* Smooth long rotation duration */
             transition: transform 7s cubic-bezier(0.15, 0.85, 0.15, 1);
         }
 
@@ -173,7 +225,6 @@
             box-sizing: border-box;
         }
 
-        /* Clean 4-quadrant layout using correct rotational offsets */
         .slice-0 { transform: rotate(0deg); background-color: var(--team-0); }
         .slice-1 { transform: rotate(90deg); background-color: var(--team-1); }
         .slice-2 { transform: rotate(180deg); background-color: var(--team-2); }
@@ -183,7 +234,6 @@
             position: absolute;
             width: 90px;
             height: 90px;
-            /* Rotate outward so text is readable radially toward the edge */
             transform: rotate(45deg);
             display: flex;
             align-items: center;
@@ -279,13 +329,29 @@
             font-weight: bold;
         }
 
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn:hover {
+            color: var(--text-main);
+        }
+
         @keyframes popIn {
             0% { transform: scale(0.8); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
 
         @media (max-width: 600px) {
-            .team-card, .team-card-header {
+            .team-card, .team-card-header, .mode-grid {
                 grid-template-columns: 1fr;
             }
             .team-card-header {
@@ -297,43 +363,72 @@
 <body>
 
     <div class="container">
-        <h1>Team Wager Showdown</h1>
-        <div class="subtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
+        <!-- SCREEN 1: Selection Menu -->
+        <div id="selectionScreen" class="screen active">
+            <h1>Select Winning Mechanism</h1>
+            <div class="subtitle">Choose how you want the champion to be decided!</div>
 
-        <div class="prompt-box">
-            <strong>Original Prompt Used:</strong>
-            "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
-        </div>
-
-        <div class="team-card-header">
-            <div>Team Name</div>
-            <div>Points</div>
-            <div>Wager</div>
-        </div>
-
-        <div class="team-grid" id="teamGrid">
-            <!-- Dynamically populated empty inputs via JavaScript -->
-        </div>
-
-        <button class="btn" onclick="runShowdown()">Spin the Wheel!</button>
-
-        <div class="spinner-container" id="spinnerContainer">
-            <div class="spinner-pointer"></div>
-            <div class="spinner-wheel" id="spinnerWheel">
-                <div class="wheel-slice slice-0"><div class="slice-content" id="slice-text-0">Team 1</div></div>
-                <div class="wheel-slice slice-1"><div class="slice-content" id="slice-text-1">Team 2</div></div>
-                <div class="wheel-slice slice-2"><div class="slice-content" id="slice-text-2">Team 3</div></div>
-                <div class="wheel-slice slice-3"><div class="slice-content" id="slice-text-3">Team 4</div></div>
+            <div class="mode-grid">
+                <div class="mode-card" onclick="selectMode('spinner')">
+                    <h3>🎡 Spinning Wheel</h3>
+                    <p>Spin the wheel of fortune to choose the winner.</p>
+                </div>
+                <div class="mode-card disabled">
+                    <h3>🎲 Mystery Roll</h3>
+                    <p>Coming soon...</p>
+                </div>
+                <div class="mode-card disabled">
+                    <h3>⚡ Lightning Draw</h3>
+                    <p>Coming soon...</p>
+                </div>
+                <div class="mode-card disabled">
+                    <h3>🔮 Oracle Choice</h3>
+                    <p>Coming soon...</p>
+                </div>
             </div>
         </div>
 
-        <div class="results-section">
-            <div id="fateDisplay" class="fate-display">The Spinner is ready...</div>
-            <div id="winnerBanner" class="winner-banner"></div>
-            
-            <div id="scoreboard" class="scoreboard">
-                <h3>📊 Scoreboard (Points Won & Lost)</h3>
-                <div id="scoreList"></div>
+        <!-- SCREEN 2: Main Game Screen -->
+        <div id="mainScreen" class="screen">
+            <button class="back-btn" onclick="goBackToSelection()">← Back to Selection</button>
+            <h1>Team Wager Showdown</h1>
+            <div class="subtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
+
+            <div class="prompt-box">
+                <strong>Original Prompt Used:</strong>
+                "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
+            </div>
+
+            <div class="team-card-header">
+                <div>Team Name</div>
+                <div>Points</div>
+                <div>Wager</div>
+            </div>
+
+            <div class="team-grid" id="teamGrid">
+                <!-- Dynamically populated empty inputs via JavaScript -->
+            </div>
+
+            <button class="btn" onclick="runShowdown()">Spin the Wheel!</button>
+
+            <div class="spinner-container" id="spinnerContainer">
+                <div class="spinner-pointer"></div>
+                <div class="spinner-wheel" id="spinnerWheel">
+                    <div class="wheel-slice slice-0"><div class="slice-content" id="slice-text-0">Team 1</div></div>
+                    <div class="wheel-slice slice-1"><div class="slice-content" id="slice-text-1">Team 2</div></div>
+                    <div class="wheel-slice slice-2"><div class="slice-content" id="slice-text-2">Team 3</div></div>
+                    <div class="wheel-slice slice-3"><div class="slice-content" id="slice-text-3">Team 4</div></div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <div id="fateDisplay" class="fate-display">The Spinner is ready...</div>
+                <div id="winnerBanner" class="winner-banner"></div>
+                
+                <div id="scoreboard" class="scoreboard">
+                    <h3>📊 Scoreboard (Points Won & Lost)</h3>
+                    <div id="scoreList"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -341,6 +436,27 @@
     <script>
         const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7'];
         let currentRotation = 0;
+        let selectedGameMode = '';
+
+        function selectMode(mode) {
+            if (mode !== 'spinner') return;
+            selectedGameMode = mode;
+            
+            document.getElementById('selectionScreen').classList.remove('active');
+            document.getElementById('mainScreen').classList.add('active');
+            renderInputs();
+        }
+
+        function goBackToSelection() {
+            document.getElementById('mainScreen').classList.remove('active');
+            document.getElementById('selectionScreen').classList.add('active');
+            
+            // Reset state
+            document.getElementById('winnerBanner').style.display = 'none';
+            document.getElementById('scoreboard').style.display = 'none';
+            document.getElementById('spinnerContainer').style.display = 'none';
+            document.getElementById('fateDisplay').textContent = "The Spinner is ready...";
+        }
 
         // Initialize 4 blank input rows with unique team colors
         function renderInputs() {
@@ -447,9 +563,6 @@
 
             scoreboard.style.display = 'block';
         }
-
-        // Initialize empty form on load
-        renderInputs();
     </script>
 </body>
 </html>
