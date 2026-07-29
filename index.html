@@ -19,6 +19,8 @@
             --team-1: #f43f5e; /* Rose */
             --team-2: #fbbf24; /* Amber */
             --team-3: #a855f7; /* Purple */
+            --team-4: #10b981; /* Emerald */
+            --team-5: #ec4899; /* Pink */
         }
 
         * {
@@ -139,6 +141,23 @@
             font-size: 0.85rem;
         }
 
+        .setup-section {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .setup-section label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
         .team-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -240,21 +259,15 @@
             box-sizing: border-box;
         }
 
-        .slice-0 { transform: rotate(0deg); background-color: var(--team-0); }
-        .slice-1 { transform: rotate(90deg); background-color: var(--team-1); }
-        .slice-2 { transform: rotate(180deg); background-color: var(--team-2); }
-        .slice-3 { transform: rotate(270deg); background-color: var(--team-3); }
-
         .slice-content {
             position: absolute;
             width: 90px;
             height: 90px;
-            transform: rotate(45deg);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #0f172a;
             text-align: center;
             text-overflow: ellipsis;
@@ -301,7 +314,7 @@
             background: #f8fafc;
             color: #0f172a;
             border: 2px solid var(--border);
-            border-radius: 16px; /* Smooth corners matching the outer container */
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -309,10 +322,9 @@
             font-weight: bold;
             box-shadow: inset 0 5px 15px rgba(0,0,0,0.1);
             backface-visibility: hidden;
-            overflow: hidden; /* Clips inner corner artwork cleanly */
+            overflow: hidden;
         }
 
-        /* Cube face placement */
         .dice-face-1 { transform: rotateY(0deg) translateZ(50px); }
         .dice-face-6 { transform: rotateY(180deg) translateZ(50px); }
         .dice-face-2 { transform: rotateY(-90deg) translateZ(50px); }
@@ -458,6 +470,17 @@
                 "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
             </a>
 
+            <div class="setup-section">
+                <label for="numTeamsSelect">Number of Teams (2 - 6)</label>
+                <select id="numTeamsSelect" onchange="renderInputs()">
+                    <option value="2">2 Teams</option>
+                    <option value="3">3 Teams</option>
+                    <option value="4" selected>4 Teams</option>
+                    <option value="5">5 Teams</option>
+                    <option value="6">6 Teams</option>
+                </select>
+            </div>
+
             <div class="team-card-header" id="teamCardHeader">
                 <div>Team Name</div>
                 <div>Points</div>
@@ -475,10 +498,7 @@
             <div class="spinner-container" id="spinnerContainer">
                 <div class="spinner-pointer"></div>
                 <div class="spinner-wheel" id="spinnerWheel">
-                    <div class="wheel-slice slice-0"><div class="slice-content" id="slice-text-0">Team 1</div></div>
-                    <div class="wheel-slice slice-1"><div class="slice-content" id="slice-text-1">Team 2</div></div>
-                    <div class="wheel-slice slice-2"><div class="slice-content" id="slice-text-2">Team 3</div></div>
-                    <div class="wheel-slice slice-3"><div class="slice-content" id="slice-text-3">Team 4</div></div>
+                    <!-- Dynamically populated wheel slices -->
                 </div>
             </div>
 
@@ -507,7 +527,7 @@
     </div>
 
     <script>
-        const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7'];
+        const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7', '#10b981', '#ec4899'];
         let currentRotation = 0;
         let selectedGameMode = '';
 
@@ -558,6 +578,7 @@
         }
 
         function renderInputs() {
+            const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
             const grid = document.getElementById('teamGrid');
             const header = document.getElementById('teamCardHeader');
             grid.innerHTML = '';
@@ -565,19 +586,20 @@
             if (selectedGameMode === 'spinner') {
                 header.style.gridTemplateColumns = '2fr 1fr 1fr';
                 document.getElementById('headerExtra').style.display = 'none';
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; i < numTeams; i++) {
                     grid.innerHTML += `
                         <div class="team-card" style="--team-color: ${teamColors[i]}; grid-template-columns: 2fr 1fr 1fr;">
-                            <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelText()">
+                            <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelSlices()">
                             <input type="number" id="points-${i}" placeholder="Points">
                             <input type="number" id="wager-${i}" placeholder="Wager">
                         </div>
                     `;
                 }
+                updateWheelSlices();
             } else if (selectedGameMode === 'dice') {
                 header.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
                 document.getElementById('headerExtra').style.display = 'block';
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; i < numTeams; i++) {
                     grid.innerHTML += `
                         <div class="team-card" style="--team-color: ${teamColors[i]};">
                             <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name">
@@ -595,24 +617,40 @@
                     `;
                 }
             }
-            updateWheelText();
         }
 
-        function updateWheelText() {
+        function updateWheelSlices() {
             if (selectedGameMode !== 'spinner') return;
-            for (let i = 0; i < 4; i++) {
+            const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
+            const wheel = document.getElementById('spinnerWheel');
+            wheel.innerHTML = '';
+
+            const angleStep = 360 / numTeams;
+
+            for (let i = 0; i < numTeams; i++) {
                 const nameInput = document.getElementById(`name-${i}`);
-                const sliceText = document.getElementById(`slice-text-${i}`);
-                if (nameInput && sliceText) {
-                    const teamName = nameInput.value.trim();
-                    sliceText.textContent = teamName || `Team ${i + 1}`;
-                }
+                const teamName = (nameInput && nameInput.value.trim()) || `Team ${i + 1}`;
+                
+                const slice = document.createElement('div');
+                slice.className = 'wheel-slice';
+                slice.style.backgroundColor = teamColors[i];
+                slice.style.transform = `rotate(${i * angleStep}deg) skewY(${90 - angleStep}deg)`;
+                
+                const content = document.createElement('div');
+                content.className = 'slice-content';
+                content.id = `slice-text-${i}`;
+                content.style.transform = `skewY(${-(90 - angleStep)}deg) rotate(${angleStep / 2}deg)`;
+                content.textContent = teamName;
+
+                slice.appendChild(content);
+                wheel.appendChild(slice);
             }
         }
 
         function runShowdown() {
+            const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
             const teams = [];
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < numTeams; i++) {
                 const nameInput = document.getElementById(`name-${i}`);
                 const name = nameInput.value.trim() || `Team ${i + 1}`;
                 const points = parseFloat(document.getElementById(`points-${i}`).value) || 0;
@@ -626,7 +664,9 @@
                 teams.push({ name, points, wager, diceChoice, color: teamColors[i], index: i });
             }
 
-            updateWheelText();
+            if (selectedGameMode === 'spinner') {
+                updateWheelSlices();
+            }
 
             const fateDisplay = document.getElementById('fateDisplay');
             const winnerBanner = document.getElementById('winnerBanner');
@@ -636,11 +676,11 @@
             scoreboard.style.display = 'none';
 
             if (selectedGameMode === 'spinner') {
-                const winningIndex = Math.floor(Math.random() * 4);
+                const winningIndex = Math.floor(Math.random() * numTeams);
                 const spins = 5; 
-                const degreesPerSlice = 90;
+                const angleStep = 360 / numTeams;
                 
-                const targetDegree = currentRotation + (360 * spins) + (360 - (winningIndex * degreesPerSlice)) - (currentRotation % 360);
+                const targetDegree = currentRotation + (360 * spins) + (360 - (winningIndex * angleStep + angleStep / 2)) - (currentRotation % 360);
                 currentRotation = targetDegree;
 
                 const spinnerWheel = document.getElementById('spinnerWheel');
