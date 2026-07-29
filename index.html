@@ -166,7 +166,25 @@
             text-transform: uppercase;
         }
 
-        input {
+        .dice-selection-container {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .dice-selection-container label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        input, select {
             width: 100%;
             padding: 10px;
             background-color: var(--bg-color);
@@ -177,9 +195,9 @@
             box-sizing: border-box;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
-            border-color: var(--team-color);
+            border-color: var(--team-0);
         }
 
         .btn {
@@ -382,9 +400,9 @@
                     <h3>🎡 Spinning Wheel</h3>
                     <p>Spin the wheel of fortune to choose the winner.</p>
                 </div>
-                <div class="mode-card disabled">
+                <div class="mode-card" onclick="selectMode('dice')">
                     <h3>🎲 Mystery Roll</h3>
-                    <p>Coming soon...</p>
+                    <p>Roll the dice and pick your side!</p>
                 </div>
                 <div class="mode-card disabled">
                     <h3>⚡ Lightning Draw</h3>
@@ -400,13 +418,25 @@
         <!-- SCREEN 2: Main Game Screen -->
         <div id="mainScreen" class="screen">
             <button class="back-btn" onclick="goBackToSelection()">← Back to Selection</button>
-            <h1>Team Wager Showdown</h1>
-            <div class="subtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
+            <h1 id="screenTitle">Team Wager Showdown</h1>
+            <div class="subtitle" id="screenSubtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
 
             <a href="https://share.gemini.google/IfRuJEeva0d2" target="_blank" class="prompt-box">
                 <strong>Original Prompt Used:</strong>
                 "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
             </a>
+
+            <div class="dice-selection-container" id="diceSelectionContainer">
+                <label for="diceSideSelect">Select Your Winning Side (1 - 6)</label>
+                <select id="diceSideSelect">
+                    <option value="1">Side 1</option>
+                    <option value="2">Side 2</option>
+                    <option value="3">Side 3</option>
+                    <option value="4">Side 4</option>
+                    <option value="5">Side 5</option>
+                    <option value="6">Side 6</option>
+                </select>
+            </div>
 
             <div class="team-card-header">
                 <div>Team Name</div>
@@ -418,7 +448,7 @@
                 <!-- Dynamically populated empty inputs via JavaScript -->
             </div>
 
-            <button class="btn" onclick="runShowdown()">Spin the Wheel!</button>
+            <button class="btn" id="actionBtn" onclick="runShowdown()">Spin the Wheel!</button>
 
             <div class="spinner-container" id="spinnerContainer">
                 <div class="spinner-pointer"></div>
@@ -448,11 +478,31 @@
         let selectedGameMode = '';
 
         function selectMode(mode) {
-            if (mode !== 'spinner') return;
             selectedGameMode = mode;
             
             document.getElementById('selectionScreen').classList.remove('active');
             document.getElementById('mainScreen').classList.add('active');
+
+            const spinnerContainer = document.getElementById('spinnerContainer');
+            const diceContainer = document.getElementById('diceSelectionContainer');
+            const actionBtn = document.getElementById('actionBtn');
+            const screenTitle = document.getElementById('screenTitle');
+            const screenSubtitle = document.getElementById('screenSubtitle');
+
+            if (mode === 'spinner') {
+                spinnerContainer.style.display = 'block';
+                diceContainer.style.display = 'none';
+                actionBtn.textContent = 'Spin the Wheel!';
+                screenTitle.textContent = 'Team Wager Showdown';
+                screenSubtitle.textContent = 'Enter your teams, current stats, and spin the wheel to decide the champion!';
+            } else if (mode === 'dice') {
+                spinnerContainer.style.display = 'none';
+                diceContainer.style.display = 'block';
+                actionBtn.textContent = 'Roll the Dice!';
+                screenTitle.textContent = 'Mystery Roll Showdown';
+                screenSubtitle.textContent = 'Enter your teams, choose your lucky dice side, and roll to win!';
+            }
+
             renderInputs();
         }
 
@@ -464,7 +514,8 @@
             document.getElementById('winnerBanner').style.display = 'none';
             document.getElementById('scoreboard').style.display = 'none';
             document.getElementById('spinnerContainer').style.display = 'none';
-            document.getElementById('fateDisplay').textContent = "The Spinner is ready...";
+            document.getElementById('diceSelectionContainer').style.display = 'none';
+            document.getElementById('fateDisplay').textContent = "Ready...";
         }
 
         // Initialize 4 blank input rows with unique team colors
@@ -508,70 +559,26 @@
             const winnerBanner = document.getElementById('winnerBanner');
             const scoreboard = document.getElementById('scoreboard');
             const scoreList = document.getElementById('scoreList');
-            const spinnerContainer = document.getElementById('spinnerContainer');
-            const spinnerWheel = document.getElementById('spinnerWheel');
             
             winnerBanner.style.display = 'none';
             scoreboard.style.display = 'none';
-            spinnerContainer.style.display = 'block';
 
-            fateDisplay.textContent = "Spinning the wheel of destiny...";
+            let winningIndex = 0;
 
-            // Pick random winner index (0 to 3)
-            const winningIndex = Math.floor(Math.random() * 4);
-            const winnerTeam = teams[winningIndex];
+            if (selectedGameMode === 'spinner') {
+                const spinnerContainer = document.getElementById('spinnerContainer');
+                const spinnerWheel = document.getElementById('spinnerWheel');
+                spinnerContainer.style.display = 'block';
+                fateDisplay.textContent = "Spinning the wheel of destiny...";
 
-            // Each slice is 90 degrees. Center of slice i is i * 90 + 45 degrees.
-            const sliceAngle = 90;
-            const targetSliceCenter = winningIndex * sliceAngle + (sliceAngle / 2);
-            
-            // 10 full spins (3600 deg) for a longer, suspenseful duration
-            const extraSpins = 360 * 10;
-            const totalRotation = currentRotation + extraSpins + (360 - (currentRotation % 360)) + (360 - targetSliceCenter);
-            
-            currentRotation = totalRotation;
-            spinnerWheel.style.transform = `rotate(${currentRotation}deg)`;
+                winningIndex = Math.floor(Math.random() * 4);
+                const sliceAngle = 90;
+                const targetSliceCenter = winningIndex * sliceAngle + (sliceAngle / 2);
+                const extraSpins = 360 * 10;
+                const totalRotation = currentRotation + extraSpins + (360 - (currentRotation % 360)) + (360 - targetSliceCenter);
+                
+                currentRotation = totalRotation;
+                spinnerWheel.style.transform = `rotate(${currentRotation}deg)`;
 
-            // Wait for spinner animation to finish (7 seconds to match CSS transition)
-            await new Promise(r => setTimeout(r, 7000));
-
-            // Set dynamic gradient colors based on winner
-            winnerBanner.style.setProperty('--winner-color-1', winnerTeam.color);
-            winnerBanner.style.setProperty('--winner-color-2', teamColors[(winningIndex + 2) % 4]);
-
-            // Output results
-            fateDisplay.textContent = "🎡 Spinner Stopped!";
-            winnerBanner.style.display = 'block';
-            winnerBanner.innerHTML = `
-                🏆 Winner: <span style="color: #fff; text-decoration: underline;">${winnerTeam.name}</span>!<br>
-                <div style="font-size: 1.0rem; font-weight: normal; margin-top: 8px; line-height: 1.5;">
-                    • Winning Team Stats:<br>
-                    - Name: <strong>${winnerTeam.name}</strong><br>
-                    - Points: <strong>${winnerTeam.points}</strong><br>
-                    - Wager: <strong>${winnerTeam.wager}</strong>
-                </div>
-            `;
-
-            // Generate Scoreboard for points won and lost based on wagers
-            scoreList.innerHTML = '';
-            teams.forEach(team => {
-                let diffText = '';
-                if (team.name === winnerTeam.name) {
-                    diffText = `<span class="points-won">+${team.wager} pts (Won)</span>`;
-                } else {
-                    diffText = `<span class="points-lost">-${team.wager} pts (Lost)</span>`;
-                }
-
-                scoreList.innerHTML += `
-                    <div class="score-item" style="--team-color: ${team.color};">
-                        <span><strong>${team.name}</strong> (Points: ${team.points}, Wager: ${team.wager})</span>
-                        ${diffText}
-                    </div>
-                `;
-            });
-
-            scoreboard.style.display = 'block';
-        }
-    </script>
-</body>
-</html>
+                await new Promise(r => setTimeout(r, 7000));
+                fateDisplay.textContent = "🎡 Spinner Stoppe
