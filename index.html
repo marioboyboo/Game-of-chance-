@@ -10,6 +10,8 @@
             --card-bg: #1e293b;
             --accent: #38bdf8;
             --accent-hover: #0ea5e9;
+            --success: #22c55e;
+            --danger: #ef4444;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #334155;
@@ -156,6 +158,48 @@
             display: none;
             animation: popIn 0.4s ease-out forwards;
             text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .scoreboard {
+            background-color: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+            text-align: left;
+        }
+
+        .scoreboard h3 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+            font-size: 0.95rem;
+        }
+
+        .score-item:last-child {
+            border-bottom: none;
+        }
+
+        .points-won {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .points-lost {
+            color: var(--danger);
+            font-weight: bold;
         }
 
         @keyframes popIn {
@@ -191,7 +235,7 @@
         </div>
 
         <div class="team-grid" id="teamGrid">
-            <!-- Dynamically populated via JavaScript for clean code -->
+            <!-- Dynamically populated empty inputs via JavaScript -->
         </div>
 
         <button class="btn" onclick="runShowdown()">Simulate Outcome</button>
@@ -199,6 +243,11 @@
         <div class="results-section">
             <div id="fateDisplay" class="fate-display">The Wheel of Destiny is waiting...</div>
             <div id="winnerBanner" class="winner-banner"></div>
+            
+            <div id="scoreboard" class="scoreboard">
+                <h3>📊 Scoreboard (Points Won & Lost)</h3>
+                <div id="scoreList"></div>
+            </div>
         </div>
     </div>
 
@@ -206,24 +255,20 @@
         // 4 Destinies/Mechanisms of Chance
         const fateTwists = [
             (teams) => {
-                // Twist 1: Pure RNG Roll
                 const winner = teams[Math.floor(Math.random() * teams.length)];
                 return { twist: "⚡ Fate Twist: Pure Random Luck Strike!", winner };
             },
             (teams) => {
-                // Twist 2: Highest Wager Wins outright
                 let highest = teams.reduce((prev, current) => (current.wager > prev.wager) ? current : prev);
                 return { twist: "💰 Fate Twist: High Roller Payoff (Highest Wager Wins)!", winner: highest };
             },
             (teams) => {
-                // Twist 3: Underdog Comeback (Lowest Points wins)
                 let lowest = teams.reduce((prev, current) => (current.points < prev.points) ? current : prev);
-                return { twist: " underdog Fate Twist: Underdog Upset (Lowest Points Wins)!", winner: lowest };
+                return { twist: "🛡️ Fate Twist: Underdog Upset (Lowest Points Wins)!", winner: lowest };
             },
             (teams) => {
-                // Twist 4: Weighted Draw based on Points
                 let totalPoints = teams.reduce((sum, t) => sum + t.points, 0);
-                let randomVal = Math.random() * (totalPoints || 4); // Fallback if 0 points
+                let randomVal = Math.random() * (totalPoints || 4);
                 let currentSum = 0;
                 let winner = teams[0];
                 
@@ -238,26 +283,19 @@
             }
         ];
 
-        // Initialize 4 default input rows
-        const defaultTeams = [
-            { name: "Alpha Strikers", points: 45, wager: 100 },
-            { name: "Bravo Bandits", points: 30, wager: 250 },
-            { name: "Charlie Cobras", points: 60, wager: 50 },
-            { name: "Delta Dragons", points: 15, wager: 500 }
-        ];
-
+        // Initialize 4 blank input rows
         function renderInputs() {
             const grid = document.getElementById('teamGrid');
             grid.innerHTML = '';
-            defaultTeams.forEach((team, index) => {
+            for (let i = 0; i < 4; i++) {
                 grid.innerHTML += `
                     <div class="team-card">
-                        <input type="text" id="name-${index}" value="${team.name}" placeholder="Team Name">
-                        <input type="number" id="points-${index}" value="${team.points}" placeholder="Points">
-                        <input type="number" id="wager-${index}" value="${team.wager}" placeholder="Wager">
+                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name">
+                        <input type="number" id="points-${i}" placeholder="Points">
+                        <input type="number" id="wager-${i}" placeholder="Wager">
                     </div>
                 `;
-            });
+            }
         }
 
         async function runShowdown() {
@@ -271,7 +309,11 @@
 
             const fateDisplay = document.getElementById('fateDisplay');
             const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            const scoreList = document.getElementById('scoreList');
+            
             winnerBanner.style.display = 'none';
+            scoreboard.style.display = 'none';
 
             // Suspense animation loop
             const loadingPhrases = [
@@ -290,21 +332,41 @@
             const selectedTwistFunction = fateTwists[Math.floor(Math.random() * fateTwists.length)];
             const result = selectedTwistFunction(teams);
 
-            // Output results including name, points, and wager details
+            // Output results
             fateDisplay.textContent = result.twist;
             winnerBanner.style.display = 'block';
             winnerBanner.innerHTML = `
                 🏆 Winner: ${result.winner.name}!<br>
                 <div style="font-size: 1rem; font-weight: normal; margin-top: 8px; line-height: 1.5;">
-                    • Final Status:<br>
+                    • Winning Team Stats:<br>
                     - Name: <strong>${result.winner.name}</strong><br>
                     - Points: <strong>${result.winner.points}</strong><br>
                     - Wager: <strong>${result.winner.wager}</strong>
                 </div>
             `;
+
+            // Generate Scoreboard for points won and lost based on wagers
+            scoreList.innerHTML = '';
+            teams.forEach(team => {
+                let diffText = '';
+                if (team.name === result.winner.name) {
+                    diffText = `<span class="points-won">+${team.wager} pts (Won)</span>`;
+                } else {
+                    diffText = `<span class="points-lost">-${team.wager} pts (Lost)</span>`;
+                }
+
+                scoreList.innerHTML += `
+                    <div class="score-item">
+                        <span><strong>${team.name}</strong> (Base Points: ${team.points}, Wager: ${team.wager})</span>
+                        ${diffText}
+                    </div>
+                `;
+            });
+
+            scoreboard.style.display = 'block';
         }
 
-        // Initialize form on load
+        // Initialize empty form on load
         renderInputs();
     </script>
 </body>
