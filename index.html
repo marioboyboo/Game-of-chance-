@@ -72,6 +72,15 @@
             margin-bottom: 25px;
             font-size: 0.85rem;
             color: var(--text-muted);
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .prompt-box:hover {
+            border-color: var(--team-0);
+            background-color: rgba(15, 23, 42, 1);
         }
 
         .prompt-box strong {
@@ -394,10 +403,10 @@
             <h1>Team Wager Showdown</h1>
             <div class="subtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
 
-            <div class="prompt-box">
+            <a href="https://share.gemini.google/IfRuJEeva0d2" target="_blank" class="prompt-box">
                 <strong>Original Prompt Used:</strong>
                 "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
-            </div>
+            </a>
 
             <div class="team-card-header">
                 <div>Team Name</div>
