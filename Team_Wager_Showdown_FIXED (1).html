@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Wager Showdown</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            
+            /* Team Unique Colors */
+            --team-0: #38bdf8; /* Blue */
+            --team-1: #f43f5e; /* Rose */
+            --team-2: #fbbf24; /* Amber */
+            --team-3: #a855f7; /* Purple */
+        }
+
+        * {
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block !important;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .prompt-box {
+            background-color: rgba(15, 23, 42, 0.8);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 25px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .prompt-box:hover {
+            border-color: var(--team-0);
+            background-color: rgba(15, 23, 42, 1);
+        }
+
+        .prompt-box strong {
+            color: var(--text-main);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Selection Screen Styles */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .mode-card {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .mode-card:hover {
+            border-color: var(--team-0);
+            transform: translateY(-2px);
+        }
+
+        .mode-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .mode-card.disabled:hover {
+            border-color: var(--border);
+            transform: none;
+        }
+
+        .mode-card h3 {
+            margin-top: 0;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .mode-card p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .team-card {
+            background-color: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+            border-left: 6px solid var(--team-color);
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .team-card-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .dice-selection-container {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .dice-selection-container label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--team-0);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--team-0), var(--team-3));
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .spinner-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 25px auto;
+            display: none;
+        }
+
+        .spinner-wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: transform 7s cubic-bezier(0.15, 0.85, 0.15, 1);
+        }
+
+        .wheel-slice {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .slice-0 { transform: rotate(0deg); background-color: var(--team-0); }
+        .slice-1 { transform: rotate(90deg); background-color: var(--team-1); }
+        .slice-2 { transform: rotate(180deg); background-color: var(--team-2); }
+        .slice-3 { transform: rotate(270deg); background-color: var(--team-3); }
+
+        .slice-content {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            transform: rotate(45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #0f172a;
+            text-align: center;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            top: 32px;
+            left: 32px;
+        }
+
+        .spinner-pointer {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 24px solid #f8fafc;
+            z-index: 10;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        .fate-display {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            min-height: 30px;
+        }
+
+        .winner-banner {
+            background: linear-gradient(135deg, var(--winner-color-1, #38bdf8), var(--winner-color-2, #6366f1));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            display: none;
+            animation: popIn 0.4s ease-out forwards;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .scoreboard {
+            background-color: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+            text-align: left;
+        }
+
+        .scoreboard h3 {
+            margin-top: 0;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            background-color: rgba(15, 23, 42, 0.4);
+            border-left: 5px solid var(--team-color);
+            font-size: 0.95rem;
+        }
+
+        .points-won {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .points-lost {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-btn:hover {
+            color: var(--text-main);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .team-card, .team-card-header, .mode-grid {
+                grid-template-columns: 1fr;
+            }
+            .team-card-header {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- SCREEN 1: Selection Menu -->
+        <div id="selectionScreen" class="screen active">
+            <h1>Select Winning Mechanism</h1>
+            <div class="subtitle">Choose how you want the champion to be decided!</div>
+
+            <div class="mode-grid">
+                <div class="mode-card" onclick="selectMode('spinner')">
+                    <h3>🎡 Spinning Wheel</h3>
+                    <p>Spin the wheel of fortune to choose the winner.</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('dice')">
+                    <h3>🎲 Mystery Roll</h3>
+                    <p>Roll the dice and pick your side!</p>
+                </div>
+                <div class="mode-card disabled">
+                    <h3>⚡ Lightning Draw</h3>
+                    <p>Coming soon...</p>
+                </div>
+                <div class="mode-card disabled">
+                    <h3>🔮 Oracle Choice</h3>
+                    <p>Coming soon...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: Main Game Screen -->
+        <div id="mainScreen" class="screen">
+            <button class="back-btn" onclick="goBackToSelection()">← Back to Selection</button>
+            <h1 id="screenTitle">Team Wager Showdown</h1>
+            <div class="subtitle" id="screenSubtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
+
+            <a href="https://share.gemini.google/IfRuJEeva0d2" target="_blank" class="prompt-box">
+                <strong>Original Prompt Used:</strong>
+                "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
+            </a>
+
+            <div class="dice-selection-container" id="diceSelectionContainer">
+                <label for="diceSideSelect">Select Your Winning Side (1 - 6)</label>
+                <select id="diceSideSelect">
+                    <option value="1">Side 1</option>
+                    <option value="2">Side 2</option>
+                    <option value="3">Side 3</option>
+                    <option value="4">Side 4</option>
+                    <option value="5">Side 5</option>
+                    <option value="6">Side 6</option>
+                </select>
+            </div>
+
+            <div class="team-card-header">
+                <div>Team Name</div>
+                <div>Points</div>
+                <div>Wager</div>
+            </div>
+
+            <div class="team-grid" id="teamGrid">
+                <!-- Dynamically populated empty inputs via JavaScript -->
+            </div>
+
+            <button class="btn" id="actionBtn" onclick="runShowdown()">Spin the Wheel!</button>
+
+            <div class="spinner-container" id="spinnerContainer">
+                <div class="spinner-pointer"></div>
+                <div class="spinner-wheel" id="spinnerWheel">
+                    <div class="wheel-slice slice-0"><div class="slice-content" id="slice-text-0">Team 1</div></div>
+                    <div class="wheel-slice slice-1"><div class="slice-content" id="slice-text-1">Team 2</div></div>
+                    <div class="wheel-slice slice-2"><div class="slice-content" id="slice-text-2">Team 3</div></div>
+                    <div class="wheel-slice slice-3"><div class="slice-content" id="slice-text-3">Team 4</div></div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <div id="fateDisplay" class="fate-display">The Spinner is ready...</div>
+                <div id="winnerBanner" class="winner-banner"></div>
+                
+                <div id="scoreboard" class="scoreboard">
+                    <h3>📊 Scoreboard (Points Won & Lost)</h3>
+                    <div id="scoreList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7'];
+        let currentRotation = 0;
+        let selectedGameMode = '';
+
+        function selectMode(mode) {
+            selectedGameMode = mode;
+            console.log('Mode selected:', mode);
+            
+            document.getElementById('selectionScreen').classList.remove('active');
+            document.getElementById('selectionScreen').style.display='none';
+            document.getElementById('mainScreen').classList.add('active');
+            document.getElementById('mainScreen').style.display='block';
+
+            const spinnerContainer = document.getElementById('spinnerContainer');
+            const diceContainer = document.getElementById('diceSelectionContainer');
+            const actionBtn = document.getElementById('actionBtn');
+            const screenTitle = document.getElementById('screenTitle');
+            const screenSubtitle = document.getElementById('screenSubtitle');
+
+            if (mode === 'spinner') {
+                spinnerContainer.style.display = 'block';
+                diceContainer.style.display = 'none';
+                actionBtn.textContent = 'Spin the Wheel!';
+                screenTitle.textContent = 'Team Wager Showdown';
+                screenSubtitle.textContent = 'Enter your teams, current stats, and spin the wheel to decide the champion!';
+            } else if (mode === 'dice') {
+                spinnerContainer.style.display = 'none';
+                diceContainer.style.display = 'block';
+                actionBtn.textContent = 'Roll the Dice!';
+                screenTitle.textContent = 'Mystery Roll Showdown';
+                screenSubtitle.textContent = 'Enter your teams, choose your lucky dice side, and roll to win!';
+            }
+
+            renderInputs();
+        }
+
+        function goBackToSelection() {
+            document.getElementById('mainScreen').classList.remove('active');
+            document.getElementById('selectionScreen').classList.add('active');
+            
+            document.getElementById('winnerBanner').style.display = 'none';
+            document.getElementById('scoreboard').style.display = 'none';
+            document.getElementById('spinnerContainer').style.display = 'none';
+            document.getElementById('diceSelectionContainer').style.display = 'none';
+            document.getElementById('fateDisplay').textContent = "Ready...";
+        }
+
+        function renderInputs() {
+            const grid = document.getElementById('teamGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                grid.innerHTML += `
+                    <div class="team-card" style="--team-color: ${teamColors[i]};">
+                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelText()">
+                        <input type="number" id="points-${i}" placeholder="Points">
+                        <input type="number" id="wager-${i}" placeholder="Wager">
+                    </div>
+                `;
+            }
+            updateWheelText();
+        }
+
+        function updateWheelText() {
+            for (let i = 0; i < 4; i++) {
+                const nameInput = document.getElementById(`name-${i}`);
+                const sliceText = document.getElementById(`slice-text-${i}`);
+                if (nameInput && sliceText) {
+                    const teamName = nameInput.value.trim();
+                    sliceText.textContent = teamName || `Team ${i + 1}`;
+                }
+            }
+        }
+
+        function runShowdown() {
+            const teams = [];
+            for (let i = 0; i < 4; i++) {
+                const nameInput = document.getElementById(`name-${i}`);
+                const name = nameInput.value.trim() || `Team ${i + 1}`;
+                const points = parseFloat(document.getElementById(`points-${i}`).value) || 0;
+                const wager = parseFloat(document.getElementById(`wager-${i}`).value) || 0;
+                teams.push({ name, points, wager, color: teamColors[i], index: i });
+            }
+
+            updateWheelText();
+
+            const fateDisplay = document.getElementById('fateDisplay');
+            const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            const scoreList = document.getElementById('scoreList');
+            
+            winnerBanner.style.display = 'none';
+            scoreboard.style.display = 'none';
+
+            let winningIndex = 0;
+
+            if (selectedGameMode === 'spinner') {
+                winningIndex = Math.floor(Math.random() * 4);
+                const spins = 5; 
+                const degreesPerSlice = 90;
+                
+                const targetDegree = currentRotation + (360 * spins) + (360 - (winningIndex * degreesPerSlice)) - (currentRotation % 360);
+                currentRotation = targetDegree;
+
+                const spinnerWheel = document.getElementById('spinnerWheel');
+                spinnerWheel.style.transform = `rotate(${currentRotation}deg)`;
+
+                fateDisplay.textContent = "The wheel is spinning...";
+
+                setTimeout(() => {
+                    finalizeResults(teams, winningIndex);
+                }, 7000);
+
+            } else if (selectedGameMode === 'dice') {
+                const chosenSide = parseInt(document.getElementById('diceSideSelect').value);
+                const rolledSide = Math.floor(Math.random() * 6) + 1;
+                winningIndex = Math.floor(Math.random() * 4);
+
+                fateDisplay.textContent = `🎲 You chose Side ${chosenSide}. The dice rolled a ${rolledSide}!`;
+
+                setTimeout(() => {
+                    finalizeResults(teams, winningIndex);
+                }, 1000);
+            }
+        }
+
+        function finalizeResults(teams, winningIndex) {
+            const winner = teams[winningIndex];
+            const fateDisplay = document.getElementById('fateDisplay');
+            const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            const scoreList = document.getElementById('scoreList');
+
+            fateDisplay.textContent = `🏆 Winner decided!`;
+            
+            winnerBanner.style.display = 'block';
+            winnerBanner.style.setProperty('--winner-color-1', winner.color);
+            winnerBanner.style.setProperty('--winner-color-2', '#1e293b');
+            winnerBanner.innerHTML = `🎉 Champion: ${winner.name}!`;
+
+            let scoreHTML = '';
+            teams.forEach((team) => {
+                let finalPoints = team.points;
+                let pointDiffHTML = '';
+
+                if (team.index === winningIndex) {
+                    finalPoints += team.wager;
+                    pointDiffHTML = `<span class="points-won">+${team.wager} pts (Total: ${finalPoints})</span>`;
+                } else {
+                    finalPoints -= team.wager;
+                    pointDiffHTML = `<span class="points-lost">-${team.wager} pts (Total: ${finalPoints})</span>`;
+                }
+
+                scoreHTML += `
+                    <div class="score-item" style="--team-color: ${team.color};">
+                        <strong>${team.name}</strong>
+                        <div>${pointDiffHTML}</div>
+                    </div>
+                `;
+            });
+
+            scoreList.innerHTML = scoreHTML;
+            scoreboard.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
