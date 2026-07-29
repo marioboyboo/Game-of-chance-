@@ -143,9 +143,9 @@
 
         .spinner-container {
             position: relative;
-            width: 240px;
-            height: 240px;
-            margin: 20px auto;
+            width: 260px;
+            height: 260px;
+            margin: 25px auto;
             display: none;
         }
 
@@ -153,11 +153,11 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 5px solid var(--border);
+            border: 6px solid var(--border);
             position: relative;
             overflow: hidden;
-            /* Longer duration for more suspense */
-            transition: transform 6s cubic-bezier(0.1, 0.7, 0.1, 1);
+            /* Smooth long rotation duration */
+            transition: transform 7s cubic-bezier(0.15, 0.85, 0.15, 1);
         }
 
         .wheel-slice {
@@ -170,39 +170,38 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 0.85rem;
-            color: #0f172a;
-            text-align: center;
             box-sizing: border-box;
         }
 
-        /* Positioning the 4 slices around the wheel */
-        .slice-0 { transform: rotate(0deg) skewY(-45deg); background-color: var(--team-0); }
-        .slice-1 { transform: rotate(90deg) skewY(-45deg); background-color: var(--team-1); }
-        .slice-2 { transform: rotate(180deg) skewY(-45deg); background-color: var(--team-2); }
-        .slice-3 { transform: rotate(270deg) skewY(-45deg); background-color: var(--team-3); }
+        /* Clean 4-quadrant layout using correct rotational offsets */
+        .slice-0 { transform: rotate(0deg); background-color: var(--team-0); }
+        .slice-1 { transform: rotate(90deg); background-color: var(--team-1); }
+        .slice-2 { transform: rotate(180deg); background-color: var(--team-2); }
+        .slice-3 { transform: rotate(270deg); background-color: var(--team-3); }
 
         .slice-content {
             position: absolute;
-            width: 100px;
-            height: 100px;
-            transform: skewY(45deg) rotate(45deg);
+            width: 90px;
+            height: 90px;
+            /* Rotate outward so text is readable radially toward the edge */
+            transform: rotate(45deg);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #0f172a;
+            text-align: center;
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
-            padding: 5px;
-            /* Adjust placement inside the slice */
-            top: 25px;
-            left: 25px;
+            top: 32px;
+            left: 32px;
         }
 
         .spinner-pointer {
             position: absolute;
-            top: -12px;
+            top: -14px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
@@ -401,15 +400,15 @@
             const sliceAngle = 90;
             const targetSliceCenter = winningIndex * sliceAngle + (sliceAngle / 2);
             
-            // Increased rotations (8 full spins = 2880 deg) for a much longer spin duration
-            const extraSpins = 360 * 8;
+            // 10 full spins (3600 deg) for a longer, suspenseful duration
+            const extraSpins = 360 * 10;
             const totalRotation = currentRotation + extraSpins + (360 - (currentRotation % 360)) + (360 - targetSliceCenter);
             
             currentRotation = totalRotation;
             spinnerWheel.style.transform = `rotate(${currentRotation}deg)`;
 
-            // Wait for spinner animation to finish (6 seconds to match CSS transition)
-            await new Promise(r => setTimeout(r, 6000));
+            // Wait for spinner animation to finish (7 seconds to match CSS transition)
+            await new Promise(r => setTimeout(r, 7000));
 
             // Set dynamic gradient colors based on winner
             winnerBanner.style.setProperty('--winner-color-1', winnerTeam.color);
@@ -420,7 +419,7 @@
             winnerBanner.style.display = 'block';
             winnerBanner.innerHTML = `
                 🏆 Winner: <span style="color: #fff; text-decoration: underline;">${winnerTeam.name}</span>!<br>
-                <div style="font-size: 1rem; font-weight: normal; margin-top: 8px; line-height: 1.5;">
+                <div style="font-size: 1.0rem; font-weight: normal; margin-top: 8px; line-height: 1.5;">
                     • Winning Team Stats:<br>
                     - Name: <strong>${winnerTeam.name}</strong><br>
                     - Points: <strong>${winnerTeam.points}</strong><br>
