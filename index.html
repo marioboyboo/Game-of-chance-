@@ -21,6 +21,10 @@
             --team-3: #a855f7; /* Purple */
         }
 
+        * {
+            touch-action: manipulation;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
@@ -105,6 +109,7 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .mode-card:hover {
@@ -211,6 +216,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.1s, opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn:hover {
@@ -366,6 +372,7 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .back-btn:hover {
@@ -478,10 +485,22 @@
         let selectedGameMode = '';
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('cardSpinner').addEventListener('click', () => selectMode('spinner'));
-            document.getElementById('cardDice').addEventListener('click', () => selectMode('dice'));
-            document.getElementById('backBtn').addEventListener('click', goBackToSelection);
-            document.getElementById('actionBtn').addEventListener('click', runShowdown);
+            const cardSpinner = document.getElementById('cardSpinner');
+            const cardDice = document.getElementById('cardDice');
+            const backBtn = document.getElementById('backBtn');
+            const actionBtn = document.getElementById('actionBtn');
+
+            cardSpinner.addEventListener('click', (e) => { e.preventDefault(); selectMode('spinner'); });
+            cardSpinner.addEventListener('touchend', (e) => { e.preventDefault(); selectMode('spinner'); });
+
+            cardDice.addEventListener('click', (e) => { e.preventDefault(); selectMode('dice'); });
+            cardDice.addEventListener('touchend', (e) => { e.preventDefault(); selectMode('dice'); });
+
+            backBtn.addEventListener('click', (e) => { e.preventDefault(); goBackToSelection(); });
+            backBtn.addEventListener('touchend', (e) => { e.preventDefault(); goBackToSelection(); });
+
+            actionBtn.addEventListener('click', (e) => { e.preventDefault(); runShowdown(); });
+            actionBtn.addEventListener('touchend', (e) => { e.preventDefault(); runShowdown(); });
         });
 
         function selectMode(mode) {
@@ -565,24 +584,3 @@
             }
 
             updateWheelText();
-
-            const fateDisplay = document.getElementById('fateDisplay');
-            const winnerBanner = document.getElementById('winnerBanner');
-            const scoreboard = document.getElementById('scoreboard');
-            const scoreList = document.getElementById('scoreList');
-            
-            winnerBanner.style.display = 'none';
-            scoreboard.style.display = 'none';
-
-            let winningIndex = 0;
-
-            if (selectedGameMode === 'spinner') {
-                winningIndex = Math.floor(Math.random() * 4);
-                const spins = 5; 
-                const degreesPerSlice = 90;
-                
-                // Calculate precise degrees to land properly on the chosen slice pointer at top
-                const targetDegree = currentRotation + (360 * spins) + (360 - (winningIndex * degreesPerSlice)) - (currentRotation % 360);
-                currentRotation = targetDegree;
-
-  
