@@ -477,7 +477,6 @@
         let currentRotation = 0;
         let selectedGameMode = '';
 
-        // Safe event listeners loaded on DOM content ready
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('cardSpinner').addEventListener('click', () => selectMode('spinner'));
             document.getElementById('cardDice').addEventListener('click', () => selectMode('dice'));
@@ -518,7 +517,6 @@
             document.getElementById('mainScreen').classList.remove('active');
             document.getElementById('selectionScreen').classList.add('active');
             
-            // Reset state
             document.getElementById('winnerBanner').style.display = 'none';
             document.getElementById('scoreboard').style.display = 'none';
             document.getElementById('spinnerContainer').style.display = 'none';
@@ -526,7 +524,6 @@
             document.getElementById('fateDisplay').textContent = "Ready...";
         }
 
-        // Initialize 4 blank input rows with unique team colors
         function renderInputs() {
             const grid = document.getElementById('teamGrid');
             grid.innerHTML = '';
@@ -540,7 +537,6 @@
                 `;
             }
             
-            // Attach input listeners separately to prevent loss of focus or glitching
             for (let i = 0; i < 4; i++) {
                 document.getElementById(`name-${i}`).addEventListener('input', updateWheelText);
             }
@@ -558,7 +554,7 @@
             }
         }
 
-        async function runShowdown() {
+        function runShowdown() {
             const teams = [];
             for (let i = 0; i < 4; i++) {
                 const nameInput = document.getElementById(`name-${i}`);
@@ -581,6 +577,12 @@
             let winningIndex = 0;
 
             if (selectedGameMode === 'spinner') {
-                const spinnerContainer = document.getElementById('spinnerContainer');
-                const spinnerWheel = document.getElementById('spinnerWheel');
-                spinnerContainer.st
+                winningIndex = Math.floor(Math.random() * 4);
+                const spins = 5; 
+                const degreesPerSlice = 90;
+                
+                // Calculate precise degrees to land properly on the chosen slice pointer at top
+                const targetDegree = currentRotation + (360 * spins) + (360 - (winningIndex * degreesPerSlice)) - (currentRotation % 360);
+                currentRotation = targetDegree;
+
+  
