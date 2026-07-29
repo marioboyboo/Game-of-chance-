@@ -50,6 +50,22 @@
             font-size: 0.95rem;
         }
 
+        .prompt-box {
+            background-color: rgba(15, 23, 42, 0.8);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 25px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .prompt-box strong {
+            color: var(--accent);
+            display: block;
+            margin-bottom: 4px;
+        }
+
         .team-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -135,10 +151,11 @@
             color: white;
             padding: 20px;
             border-radius: 10px;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: bold;
             display: none;
             animation: popIn 0.4s ease-out forwards;
+            text-align: left;
         }
 
         @keyframes popIn {
@@ -161,6 +178,11 @@
     <div class="container">
         <h1>Team Wager Showdown</h1>
         <div class="subtitle">Enter your teams, current stats, and watch fate decide the champion!</div>
+
+        <div class="prompt-box">
+            <strong>Original Prompt Used:</strong>
+            "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
+        </div>
 
         <div class="team-card-header">
             <div>Team Name</div>
@@ -268,10 +290,18 @@
             const selectedTwistFunction = fateTwists[Math.floor(Math.random() * fateTwists.length)];
             const result = selectedTwistFunction(teams);
 
-            // Output results
+            // Output results including name, points, and wager details
             fateDisplay.textContent = result.twist;
             winnerBanner.style.display = 'block';
-            winnerBanner.innerHTML = `🏆 Winner: ${result.winner.name}! <br><span style="font-size: 1rem; font-weight: normal;">(Points: ${result.winner.points} | Wager: ${result.winner.wager})</span>`;
+            winnerBanner.innerHTML = `
+                🏆 Winner: ${result.winner.name}!<br>
+                <div style="font-size: 1rem; font-weight: normal; margin-top: 8px; line-height: 1.5;">
+                    • Final Status:<br>
+                    - Name: <strong>${result.winner.name}</strong><br>
+                    - Points: <strong>${result.winner.points}</strong><br>
+                    - Wager: <strong>${result.winner.wager}</strong>
+                </div>
+            `;
         }
 
         // Initialize form on load
