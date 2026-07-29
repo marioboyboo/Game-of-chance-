@@ -170,7 +170,7 @@
             border-radius: 10px;
             padding: 15px;
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr;
             gap: 10px;
             align-items: center;
             border-left: 6px solid var(--team-color);
@@ -181,7 +181,7 @@
 
         .team-card-header {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr;
             gap: 10px;
             margin-bottom: 8px;
             font-weight: 600;
@@ -332,6 +332,64 @@
         .dice-face-3 { transform: rotateX(90deg) translateZ(50px); }
         .dice-face-4 { transform: rotateX(-90deg) translateZ(50px); }
 
+        /* Oracle Cat Wizard Styles */
+        .oracle-container {
+            width: 220px;
+            margin: 20px auto;
+            text-align: center;
+            display: none;
+            position: relative;
+        }
+
+        .cat-wizard-frame {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid var(--team-3);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+            position: relative;
+            background-color: #0f172a;
+        }
+
+        .cat-wizard-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.1);
+        }
+
+        .oracle-orb {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #38bdf8, #a855f7);
+            border-radius: 50%;
+            margin: -25px auto 0 auto;
+            position: relative;
+            z-index: 5;
+            box-shadow: 0 0 15px #38bdf8, inset 0 0 10px rgba(255,255,255,0.6);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .oracle-container.thinking .cat-wizard-frame {
+            animation: catPulse 1s infinite alternate ease-in-out;
+        }
+
+        .oracle-container.thinking .oracle-orb {
+            animation: orbGlow 0.8s infinite alternate ease-in-out;
+        }
+
+        @keyframes catPulse {
+            0% { transform: scale(1) rotate(-2deg); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+            100% { transform: scale(1.05) rotate(2deg); box-shadow: 0 0 30px rgba(56, 189, 248, 0.8); }
+        }
+
+        @keyframes orbGlow {
+            0% { transform: scale(0.9); box-shadow: 0 0 10px #38bdf8; }
+            100% { transform: scale(1.15); box-shadow: 0 0 25px #a855f7, 0 0 40px #38bdf8; }
+        }
+
         .results-section {
             margin-top: 30px;
             border-top: 1px solid var(--border);
@@ -448,12 +506,12 @@
                     <h3>🎲 Mystery Roll</h3>
                     <p>Roll the dice and pick your side!</p>
                 </div>
-                <div class="mode-card disabled">
-                    <h3>⚡ Lightning Draw</h3>
-                    <p>Coming soon...</p>
+                <div class="mode-card" onclick="selectMode('oracle')">
+                    <h3>🔮 Oracle Choice</h3>
+                    <p>Consult the wizard cat and its mystical orb.</p>
                 </div>
                 <div class="mode-card disabled">
-                    <h3>🔮 Oracle Choice</h3>
+                    <h3>⚡ Lightning Draw</h3>
                     <p>Coming soon...</p>
                 </div>
             </div>
@@ -485,7 +543,6 @@
                 <div>Team Name</div>
                 <div>Points</div>
                 <div>Wager</div>
-                <div id="headerExtra">Choice</div>
             </div>
 
             <div class="team-grid" id="teamGrid">
@@ -512,6 +569,14 @@
                     <div class="dice-face dice-face-5">5</div>
                     <div class="dice-face dice-face-6">6</div>
                 </div>
+            </div>
+
+            <!-- Oracle Cat Wizard Element -->
+            <div class="oracle-container" id="oracleContainer">
+                <div class="cat-wizard-frame">
+                    <img src="20260702_232635(1).jpg" alt="Wizard Cat Oracle">
+                </div>
+                <div class="oracle-orb" id="oracleOrb"></div>
             </div>
 
             <div class="results-section">
@@ -541,26 +606,31 @@
 
             const spinnerContainer = document.getElementById('spinnerContainer');
             const diceScene = document.getElementById('diceScene');
+            const oracleContainer = document.getElementById('oracleContainer');
             const actionBtn = document.getElementById('actionBtn');
             const screenTitle = document.getElementById('screenTitle');
             const screenSubtitle = document.getElementById('screenSubtitle');
-            const headerExtra = document.getElementById('headerExtra');
+
+            spinnerContainer.style.display = 'none';
+            diceScene.style.display = 'none';
+            oracleContainer.style.display = 'none';
+            oracleContainer.classList.remove('thinking');
 
             if (mode === 'spinner') {
                 spinnerContainer.style.display = 'block';
-                diceScene.style.display = 'none';
                 actionBtn.textContent = 'Spin the Wheel!';
                 screenTitle.textContent = 'Team Wager Showdown';
                 screenSubtitle.textContent = 'Enter your teams, current stats, and spin the wheel to decide the champion!';
-                headerExtra.style.display = 'none';
             } else if (mode === 'dice') {
-                spinnerContainer.style.display = 'none';
                 diceScene.style.display = 'block';
                 actionBtn.textContent = 'Roll the Dice!';
                 screenTitle.textContent = 'Mystery Roll Showdown';
                 screenSubtitle.textContent = 'Enter your teams, choose each team\'s target dice side, and roll to win!';
-                headerExtra.style.display = 'block';
-                headerExtra.textContent = 'Side (1-6)';
+            } else if (mode === 'oracle') {
+                oracleContainer.style.display = 'block';
+                actionBtn.textContent = 'Consult the Oracle Cat!';
+                screenTitle.textContent = 'Oracle Cat Showdown';
+                screenSubtitle.textContent = 'Watch the wizard cat gaze into its mystical orb to reveal the true champion!';
             }
 
             renderInputs();
@@ -574,6 +644,7 @@
             document.getElementById('scoreboard').style.display = 'none';
             document.getElementById('spinnerContainer').style.display = 'none';
             document.getElementById('diceScene').style.display = 'none';
+            document.getElementById('oracleContainer').style.display = 'none';
             document.getElementById('fateDisplay').textContent = "Ready...";
         }
 
@@ -583,39 +654,37 @@
             const header = document.getElementById('teamCardHeader');
             grid.innerHTML = '';
 
+            header.style.gridTemplateColumns = '2fr 1fr 1fr';
+
+            for (let i = 0; i < numTeams; i++) {
+                let extraContent = '';
+                if (selectedGameMode === 'dice') {
+                    header.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
+                    extraContent = `
+                        <select id="dice-choice-${i}">
+                            <option value="1">Side 1</option>
+                            <option value="2">Side 2</option>
+                            <option value="3">Side 3</option>
+                            <option value="4">Side 4</option>
+                            <option value="5">Side 5</option>
+                            <option value="6">Side 6</option>
+                        </select>
+                    `;
+                } else {
+                    header.style.gridTemplateColumns = '2fr 1fr 1fr';
+                }
+
+                grid.innerHTML += `
+                    <div class="team-card" style="--team-color: ${teamColors[i]}; grid-template-columns: ${header.style.gridTemplateColumns};">
+                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelSlices()">
+                        <input type="number" id="points-${i}" placeholder="Points">
+                        <input type="number" id="wager-${i}" placeholder="Wager">
+                        ${extraContent}
+                    </div>
+                `;
+            }
             if (selectedGameMode === 'spinner') {
-                header.style.gridTemplateColumns = '2fr 1fr 1fr';
-                document.getElementById('headerExtra').style.display = 'none';
-                for (let i = 0; i < numTeams; i++) {
-                    grid.innerHTML += `
-                        <div class="team-card" style="--team-color: ${teamColors[i]}; grid-template-columns: 2fr 1fr 1fr;">
-                            <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelSlices()">
-                            <input type="number" id="points-${i}" placeholder="Points">
-                            <input type="number" id="wager-${i}" placeholder="Wager">
-                        </div>
-                    `;
-                }
                 updateWheelSlices();
-            } else if (selectedGameMode === 'dice') {
-                header.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
-                document.getElementById('headerExtra').style.display = 'block';
-                for (let i = 0; i < numTeams; i++) {
-                    grid.innerHTML += `
-                        <div class="team-card" style="--team-color: ${teamColors[i]};">
-                            <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name">
-                            <input type="number" id="points-${i}" placeholder="Points">
-                            <input type="number" id="wager-${i}" placeholder="Wager">
-                            <select id="dice-choice-${i}">
-                                <option value="1">Side 1</option>
-                                <option value="2">Side 2</option>
-                                <option value="3">Side 3</option>
-                                <option value="4">Side 4</option>
-                                <option value="5">Side 5</option>
-                                <option value="6">Side 6</option>
-                            </select>
-                        </div>
-                    `;
-                }
             }
         }
 
@@ -689,7 +758,7 @@
                 fateDisplay.textContent = "The wheel is spinning...";
 
                 setTimeout(() => {
-                    finalizeSpinnerResults(teams, winningIndex);
+                    finalizeWinnerResults(teams, winningIndex);
                 }, 7000);
 
             } else if (selectedGameMode === 'dice') {
@@ -717,17 +786,28 @@
                 setTimeout(() => {
                     finalizeDiceResults(teams, rolledSide);
                 }, 1600);
+
+            } else if (selectedGameMode === 'oracle') {
+                const oracleContainer = document.getElementById('oracleContainer');
+                oracleContainer.classList.add('thinking');
+                fateDisplay.textContent = "🔮 The wizard cat is gazing deeply into the orb and thinking...";
+
+                setTimeout(() => {
+                    oracleContainer.classList.remove('thinking');
+                    const winningIndex = Math.floor(Math.random() * numTeams);
+                    finalizeWinnerResults(teams, winningIndex);
+                }, 2500);
             }
         }
 
-        function finalizeSpinnerResults(teams, winningIndex) {
+        function finalizeWinnerResults(teams, winningIndex) {
             const winner = teams[winningIndex];
             const fateDisplay = document.getElementById('fateDisplay');
             const winnerBanner = document.getElementById('winnerBanner');
             const scoreboard = document.getElementById('scoreboard');
             const scoreList = document.getElementById('scoreList');
 
-            fateDisplay.textContent = `🏆 Winner decided!`;
+            fateDisplay.textContent = `🏆 The champion has been revealed!`;
             
             winnerBanner.style.display = 'block';
             winnerBanner.style.setProperty('--winner-color-1', winner.color);
