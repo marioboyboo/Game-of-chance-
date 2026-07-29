@@ -396,11 +396,11 @@
             <div class="subtitle">Choose how you want the champion to be decided!</div>
 
             <div class="mode-grid">
-                <div class="mode-card" onclick="selectMode('spinner')">
+                <div class="mode-card" id="cardSpinner">
                     <h3>🎡 Spinning Wheel</h3>
                     <p>Spin the wheel of fortune to choose the winner.</p>
                 </div>
-                <div class="mode-card" onclick="selectMode('dice')">
+                <div class="mode-card" id="cardDice">
                     <h3>🎲 Mystery Roll</h3>
                     <p>Roll the dice and pick your side!</p>
                 </div>
@@ -417,7 +417,7 @@
 
         <!-- SCREEN 2: Main Game Screen -->
         <div id="mainScreen" class="screen">
-            <button class="back-btn" onclick="goBackToSelection()">← Back to Selection</button>
+            <button class="back-btn" id="backBtn">← Back to Selection</button>
             <h1 id="screenTitle">Team Wager Showdown</h1>
             <div class="subtitle" id="screenSubtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
 
@@ -448,7 +448,7 @@
                 <!-- Dynamically populated empty inputs via JavaScript -->
             </div>
 
-            <button class="btn" id="actionBtn" onclick="runShowdown()">Spin the Wheel!</button>
+            <button class="btn" id="actionBtn">Spin the Wheel!</button>
 
             <div class="spinner-container" id="spinnerContainer">
                 <div class="spinner-pointer"></div>
@@ -476,6 +476,14 @@
         const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7'];
         let currentRotation = 0;
         let selectedGameMode = '';
+
+        // Safe event listeners loaded on DOM content ready
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('cardSpinner').addEventListener('click', () => selectMode('spinner'));
+            document.getElementById('cardDice').addEventListener('click', () => selectMode('dice'));
+            document.getElementById('backBtn').addEventListener('click', goBackToSelection);
+            document.getElementById('actionBtn').addEventListener('click', runShowdown);
+        });
 
         function selectMode(mode) {
             selectedGameMode = mode;
@@ -525,11 +533,16 @@
             for (let i = 0; i < 4; i++) {
                 grid.innerHTML += `
                     <div class="team-card" style="--team-color: ${teamColors[i]};">
-                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelText()">
+                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name">
                         <input type="number" id="points-${i}" placeholder="Points">
                         <input type="number" id="wager-${i}" placeholder="Wager">
                     </div>
                 `;
+            }
+            
+            // Attach input listeners separately to prevent loss of focus or glitching
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`name-${i}`).addEventListener('input', updateWheelText);
             }
             updateWheelText();
         }
@@ -538,8 +551,10 @@
             for (let i = 0; i < 4; i++) {
                 const nameInput = document.getElementById(`name-${i}`);
                 const sliceText = document.getElementById(`slice-text-${i}`);
-                const teamName = nameInput ? nameInput.value.trim() : "";
-                sliceText.textContent = teamName || `Team ${i + 1}`;
+                if (nameInput && sliceText) {
+                    const teamName = nameInput.value.trim();
+                    sliceText.textContent = teamName || `Team ${i + 1}`;
+                }
             }
         }
 
@@ -568,17 +583,4 @@
             if (selectedGameMode === 'spinner') {
                 const spinnerContainer = document.getElementById('spinnerContainer');
                 const spinnerWheel = document.getElementById('spinnerWheel');
-                spinnerContainer.style.display = 'block';
-                fateDisplay.textContent = "Spinning the wheel of destiny...";
-
-                winningIndex = Math.floor(Math.random() * 4);
-                const sliceAngle = 90;
-                const targetSliceCenter = winningIndex * sliceAngle + (sliceAngle / 2);
-                const extraSpins = 360 * 10;
-                const totalRotation = currentRotation + extraSpins + (360 - (currentRotation % 360)) + (360 - targetSliceCenter);
-                
-                currentRotation = totalRotation;
-                spinnerWheel.style.transform = `rotate(${currentRotation}deg)`;
-
-                await new Promise(r => setTimeout(r, 7000));
-                fateDisplay.textContent = "🎡 Spinner Stoppe
+                spinnerContainer.st
