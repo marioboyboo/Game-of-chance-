@@ -469,11 +469,11 @@
             transition: transform 0.5s ease, box-shadow 0.5s ease;
         }
 
-        /* Lightning Draw Deluxe Arena Styles */
+        /* Lightning Landscape Arena Styles with Ground & Trees */
         .lightning-arena {
             width: 100%;
             height: 250px;
-            background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #030712 100%);
+            background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #030712 100%);
             border: 2px solid var(--border);
             border-radius: 14px;
             position: relative;
@@ -481,6 +481,44 @@
             overflow: hidden;
             display: none;
             box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .ground-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(to bottom, #166534, #14532d);
+            border-top: 2px solid #22c55e;
+            z-index: 4;
+        }
+
+        .tree-element {
+            position: absolute;
+            bottom: 28px;
+            width: 24px;
+            height: 50px;
+            z-index: 6;
+        }
+        .tree-trunk {
+            position: absolute;
+            bottom: 0;
+            left: 8px;
+            width: 8px;
+            height: 20px;
+            background: #78350f;
+            border-radius: 2px;
+        }
+        .tree-leaves {
+            position: absolute;
+            bottom: 15px;
+            left: -4px;
+            width: 32px;
+            height: 35px;
+            background: #065f46;
+            border-radius: 50% 50% 40% 40%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         .storm-cloud {
@@ -526,13 +564,13 @@
 
         .runner-character {
             position: absolute;
-            bottom: 15px;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
             width: 32px;
             height: 48px;
             z-index: 10;
-            transition: left 0.1s linear;
+            transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .runner-head {
@@ -564,17 +602,15 @@
             clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
         }
 
-        /* Striking Lightning Path Bolt */
-        .dynamic-bolt {
+        /* Classic Yellow Tree-like Jagged Lightning Path */
+        .classic-lightning {
             position: absolute;
-            top: 50px;
-            width: 6px;
-            background: #ffffff;
-            box-shadow: 0 0 20px #38bdf8, 0 0 40px #ffffff;
+            top: 52px;
+            width: 8px;
+            background: transparent;
             z-index: 8;
             display: none;
             transform-origin: top center;
-            clip-path: polygon(40% 0%, 100% 30%, 30% 50%, 90% 80%, 20% 100%, 50% 60%, 10% 40%, 60% 20%);
         }
 
         .results-section {
@@ -699,7 +735,7 @@
                 </div>
                 <div class="mode-card" onclick="selectMode('lightning')">
                     <h3>⚡ Lightning Draw</h3>
-                    <p>Watch storm clouds constantly strike before one hits the running character!</p>
+                    <p>Watch classic yellow lightning strike over trees before hitting the runner!</p>
                 </div>
             </div>
         </div>
@@ -777,15 +813,19 @@
                 <div class="oracle-orb" id="oracleOrb"></div>
             </div>
 
-            <!-- Lightning Draw Arena Element -->
+            <!-- Lightning Draw Arena with Trees and Ground -->
             <div class="lightning-arena" id="lightningArena">
+                <div class="ground-layer"></div>
                 <div class="runner-character" id="runnerCharacter">
                     <div class="runner-head"></div>
                     <div class="runner-body"></div>
                     <div class="runner-legs"></div>
                 </div>
-                <div class="dynamic-bolt" id="dynamicBolt"></div>
+                <svg class="classic-lightning" id="classicLightning" viewBox="0 0 60 180" preserveAspectRatio="none">
+                    <path id="lightningPath" d="M30,0 L20,60 L40,75 L15,140 L35,150 L25,180" fill="none" stroke="#facc15" stroke-width="4" stroke-linejoin="round" filter="drop-shadow(0 0 8px #facc15)" />
+                </svg>
                 <div id="cloudsContainer"></div>
+                <div id="treesContainer"></div>
             </div>
 
             <div class="results-section">
@@ -805,7 +845,6 @@
         const cloudPalettes = ['#475569', '#334155', '#1e293b', '#64748b', '#3b82f6', '#8b5cf6'];
         let currentRotation = 0;
         let selectedGameMode = '';
-        let runnerInterval = null;
         let lightningLoopTimer = null;
 
         function selectMode(mode) {
@@ -829,7 +868,6 @@
             oracleContainer.style.display = 'none';
             oracleContainer.classList.remove('thinking');
             lightningArena.style.display = 'none';
-            stopRunnerMovement();
             clearLightningLoop();
 
             if (mode === 'spinner') {
@@ -868,7 +906,6 @@
             document.getElementById('oracleContainer').style.display = 'none';
             document.getElementById('lightningArena').style.display = 'none';
             document.getElementById('fateDisplay').textContent = "Ready...";
-            stopRunnerMovement();
             clearLightningLoop();
         }
 
@@ -918,7 +955,7 @@
             if (selectedGameMode === 'spinner') {
                 updateWheelSlices();
             } else if (selectedGameMode === 'lightning') {
-                updateLightningClouds();
+                updateLightningEnvironment();
             }
         }
 
@@ -926,7 +963,7 @@
             if (selectedGameMode === 'spinner') {
                 updateWheelSlices();
             } else if (selectedGameMode === 'lightning') {
-                updateLightningClouds();
+                updateLightningEnvironment();
             }
         }
 
@@ -958,11 +995,13 @@
             }
         }
 
-        function updateLightningClouds() {
+        function updateLightningEnvironment() {
             if (selectedGameMode !== 'lightning') return;
             const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
             const cloudsContainer = document.getElementById('cloudsContainer');
+            const treesContainer = document.getElementById('treesContainer');
             cloudsContainer.innerHTML = '';
+            treesContainer.innerHTML = '';
 
             const spacing = 100 / (numTeams + 1);
 
@@ -971,6 +1010,7 @@
                 const teamName = (nameInput && nameInput.value.trim()) || `Team ${i + 1}`;
                 const leftPos = spacing * (i + 1);
 
+                // Create Cloud
                 const cloud = document.createElement('div');
                 cloud.className = 'storm-cloud';
                 cloud.id = `cloud-${i}`;
@@ -980,6 +1020,14 @@
                 cloud.title = teamName;
                 cloudsContainer.appendChild(cloud);
 
+                // Create Tree underneath/near cloud position
+                const tree = document.createElement('div');
+                tree.className = 'tree-element';
+                tree.style.left = `calc(${leftPos}% + 15px)`;
+                tree.innerHTML = '<div class="tree-trunk"></div><div class="tree-leaves"></div>';
+                treesContainer.appendChild(tree);
+
+                // Update select dropdown option label
                 const selectElem = document.getElementById(`lightning-choice-${i}`);
                 if (selectElem) {
                     selectElem.innerHTML = '';
@@ -993,30 +1041,22 @@
                 }
             }
 
-            setupRunnerMovement();
-        }
-
-        function setupRunnerMovement() {
+            // Set runner to center
             const runner = document.getElementById('runnerCharacter');
             runner.style.left = '50%';
-            stopRunnerMovement();
-
-            let direction = 1;
-            let currentPos = 50;
-
-            runnerInterval = setInterval(() => {
-                currentPos += direction * 1.8;
-                if (currentPos > 85) direction = -1;
-                if (currentPos < 15) direction = 1;
-                runner.style.left = `${currentPos}%`;
-            }, 40);
         }
 
-        function stopRunnerMovement() {
-            if (runnerInterval) {
-                clearInterval(runnerInterval);
-                runnerInterval = null;
+        function generateJaggedTreePath() {
+            // Generates classic jagged tree-like branching lightning path coordinates
+            let points = "M30,0";
+            let currentX = 30;
+            let currentY = 0;
+            while (currentY < 170) {
+                currentY += Math.floor(Math.random() * 25) + 15;
+                currentX += (Math.random() * 30 - 15);
+                points += ` L${currentX},${currentY}`;
             }
+            return points;
         }
 
         function clearLightningLoop() {
@@ -1024,7 +1064,7 @@
                 clearInterval(lightningLoopTimer);
                 lightningLoopTimer = null;
             }
-            const bolt = document.getElementById('dynamicBolt');
+            const bolt = document.getElementById('classicLightning');
             if (bolt) bolt.style.display = 'none';
         }
 
@@ -1116,47 +1156,48 @@
                 }, 2500);
 
             } else if (selectedGameMode === 'lightning') {
-                fateDisplay.textContent = "⚡ Storm unleashed! Clouds are constantly striking around the arena...";
+                fateDisplay.textContent = "⚡ Thunderstorm rolling! Lightning strikes randomly across the trees...";
                 
                 const winningCloudIndex = Math.floor(Math.random() * numTeams);
                 const spacing = 100 / (numTeams + 1);
-                const bolt = document.getElementById('dynamicBolt');
+                const boltElement = document.getElementById('classicLightning');
+                const pathElement = document.getElementById('lightningPath');
 
-                // Continuously strike random clouds until the final winning strike hits the runner
+                // Continuously strike random clouds/trees until the final strike hits the runner
                 lightningLoopTimer = setInterval(() => {
-                    const randomStrikeCloud = Math.floor(Math.random() * numTeams);
-                    const strikePos = spacing * (randomStrikeCloud + 1);
+                    const randomCloud = Math.floor(Math.random() * numTeams);
+                    const strikePos = spacing * (randomCloud + 1);
                     
-                    bolt.style.left = `calc(${strikePos}% - 3px)`;
-                    bolt.style.display = 'block';
-                    bolt.style.boxShadow = `0 0 25px ${teamColors[randomStrikeCloud]}, 0 0 45px #ffffff`;
+                    boltElement.style.left = `calc(${strikePos}% - 15px)`;
+                    pathElement.setAttribute('d', generateJaggedTreePath());
+                    boltElement.style.display = 'block';
 
                     setTimeout(() => {
-                        bolt.style.display = 'none';
-                    }, 180);
+                        boltElement.style.display = 'none';
+                    }, 150);
                 }, 350);
 
-                // After 2.8 seconds, target hits the runner from the correct winning cloud
+                // After 2.5 seconds, the guy casually walks/moves toward where he's gonna get struck
+                setTimeout(() => {
+                    const runner = document.getElementById('runnerCharacter');
+                    const targetLeftPos = spacing * (winningCloudIndex + 1);
+                    runner.style.left = `${targetLeftPos}%`;
+                }, 1000);
+
+                // Final strike hits him from the correct winning cloud
                 setTimeout(() => {
                     clearInterval(lightningLoopTimer);
                     lightningLoopTimer = null;
 
-                    stopRunnerMovement();
-                    const runner = document.getElementById('runnerCharacter');
-                    const targetLeftPos = spacing * (winningCloudIndex + 1);
-                    runner.style.left = `${targetLeftPos}%`;
+                    const finalStrikePos = spacing * (winningCloudIndex + 1);
+                    boltElement.style.left = `calc(${finalStrikePos}% - 15px)`;
+                    pathElement.setAttribute('d', generateJaggedTreePath());
+                    boltElement.style.display = 'block';
 
                     setTimeout(() => {
-                        bolt.style.left = `calc(${targetLeftPos}% - 3px)`;
-                        bolt.style.height = '180px';
-                        bolt.style.boxShadow = `0 0 35px ${teamColors[winningCloudIndex]}, 0 0 60px #ffffff`;
-                        bolt.style.display = 'block';
-
-                        setTimeout(() => {
-                            bolt.style.display = 'none';
-                            finalizeLightningResults(teams, winningCloudIndex);
-                        }, 700);
-                    }, 200);
+                        boltElement.style.display = 'none';
+                        finalizeLightningResults(teams, winningCloudIndex);
+                    }, 800);
 
                 }, 2800);
             }
@@ -1254,7 +1295,7 @@
             const scoreboard = document.getElementById('scoreboard');
             const scoreList = document.getElementById('scoreList');
 
-            fateDisplay.textContent = `⚡ Cloud ${winningCloudIndex + 1} struck the runner first!`;
+            fateDisplay.textContent = `⚡ Cloud ${winningCloudIndex + 1} struck the runner!`;
             
             let winnersText = [];
             let scoreHTML = '';
@@ -1282,7 +1323,7 @@
             });
 
             winnerBanner.style.display = 'block';
-            winnerBanner.style.setProperty('--winner-color-1', teamColors[winningCloudIndex]);
+            winnerBanner.style.setProperty('--winner-color-1', '#facc15');
             winnerBanner.style.setProperty('--winner-color-2', '#111827');
 
             if (winnersText.length > 0) {
@@ -1293,8 +1334,6 @@
 
             scoreList.innerHTML = scoreHTML;
             scoreboard.style.display = 'block';
-            
-            setupRunnerMovement();
         }
     </script>
 </body>
