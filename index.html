@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Wager Showdown</title>
+    <title>Team Wager Showdown - Lightning Draw</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -117,16 +117,6 @@
         .mode-card:hover {
             border-color: var(--team-0);
             transform: translateY(-2px);
-        }
-
-        .mode-card.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .mode-card.disabled:hover {
-            border-color: var(--border);
-            transform: none;
         }
 
         .mode-card h3 {
@@ -356,7 +346,6 @@
             justify-content: center;
         }
 
-        /* Pure CSS Wizard Cat Illustration */
         .wizard-cat {
             position: relative;
             width: 110px;
@@ -364,7 +353,6 @@
             margin-top: 15px;
         }
 
-        /* Wizard Hat */
         .wizard-hat {
             position: absolute;
             top: -28px;
@@ -388,7 +376,6 @@
             border-radius: 50%;
         }
 
-        /* Cat Head & Ears */
         .cat-head {
             position: absolute;
             top: 15px;
@@ -413,7 +400,6 @@
         .cat-ear.left { left: 5px; transform: rotate(-15deg); }
         .cat-ear.right { right: 5px; transform: rotate(15deg); }
 
-        /* Cat Eyes */
         .cat-eyes {
             position: absolute;
             top: 22px;
@@ -441,7 +427,6 @@
             border-radius: 50%;
         }
 
-        /* Cat Nose & Mouth */
         .cat-nose {
             position: absolute;
             top: 36px;
@@ -454,7 +439,6 @@
             z-index: 3;
         }
 
-        /* Paws holding the orb */
         .cat-paws {
             position: absolute;
             bottom: 5px;
@@ -501,6 +485,111 @@
         @keyframes orbGlow {
             0% { transform: scale(0.9); box-shadow: 0 0 10px #38bdf8; }
             100% { transform: scale(1.15); box-shadow: 0 0 25px #a855f7, 0 0 40px #38bdf8; }
+        }
+
+        /* Lightning Draw Arena Styles */
+        .lightning-arena {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(to bottom, #090d16, #1e293b);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            position: relative;
+            margin: 20px auto;
+            overflow: hidden;
+            display: none;
+        }
+
+        .cloud-element {
+            position: absolute;
+            top: 15px;
+            width: 65px;
+            height: 35px;
+            background: #cbd5e1;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #0f172a;
+            border: 2px solid var(--cloud-color, #fff);
+            transition: transform 0.2s;
+            z-index: 5;
+        }
+
+        .cloud-element::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 12px;
+            width: 25px;
+            height: 25px;
+            background: #cbd5e1;
+            border-radius: 50%;
+        }
+
+        .cloud-element::after {
+            content: '';
+            position: absolute;
+            top: -18px;
+            left: 28px;
+            width: 30px;
+            height: 30px;
+            background: #cbd5e1;
+            border-radius: 50%;
+        }
+
+        .runner-character {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 45px;
+            z-index: 10;
+            transition: left 0.1s linear;
+        }
+
+        /* Runner CSS Shape */
+        .runner-head {
+            position: absolute;
+            top: 0;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            background: #f8fafc;
+            border-radius: 50%;
+        }
+        .runner-body {
+            position: absolute;
+            top: 12px;
+            left: 10px;
+            width: 10px;
+            height: 18px;
+            background: #38bdf8;
+            border-radius: 4px;
+        }
+        .runner-legs {
+            position: absolute;
+            bottom: 0;
+            left: 6px;
+            width: 18px;
+            height: 15px;
+            background: #f8fafc;
+            clip-path: polygon(0 0, 100% 0, 70% 100%, 30% 100%);
+        }
+
+        .lightning-bolt {
+            position: absolute;
+            top: 50px;
+            width: 6px;
+            background: #facc15;
+            box-shadow: 0 0 15px #facc15, 0 0 25px #ffffff;
+            z-index: 8;
+            display: none;
+            transform-origin: top center;
         }
 
         .results-section {
@@ -623,9 +712,9 @@
                     <h3>🔮 Oracle Choice</h3>
                     <p>Consult the wizard cat and its mystical orb.</p>
                 </div>
-                <div class="mode-card disabled">
+                <div class="mode-card" onclick="selectMode('lightning')">
                     <h3>⚡ Lightning Draw</h3>
-                    <p>Coming soon...</p>
+                    <p>Pick which storm cloud strikes the running character first!</p>
                 </div>
             </div>
         </div>
@@ -667,9 +756,7 @@
             <!-- Spinning Wheel Element -->
             <div class="spinner-container" id="spinnerContainer">
                 <div class="spinner-pointer"></div>
-                <div class="spinner-wheel" id="spinnerWheel">
-                    <!-- Dynamically populated wheel slices -->
-                </div>
+                <div class="spinner-wheel" id="spinnerWheel"></div>
             </div>
 
             <!-- 3D Dice Element -->
@@ -684,7 +771,7 @@
                 </div>
             </div>
 
-            <!-- Oracle Cat Wizard Element (Built directly with custom graphics) -->
+            <!-- Oracle Cat Wizard Element -->
             <div class="oracle-container" id="oracleContainer">
                 <div class="cat-wizard-frame">
                     <div class="wizard-cat">
@@ -707,6 +794,17 @@
                 <div class="oracle-orb" id="oracleOrb"></div>
             </div>
 
+            <!-- Lightning Draw Arena Element -->
+            <div class="lightning-arena" id="lightningArena">
+                <div class="runner-character" id="runnerCharacter">
+                    <div class="runner-head"></div>
+                    <div class="runner-body"></div>
+                    <div class="runner-legs"></div>
+                </div>
+                <div class="lightning-bolt" id="lightningBolt"></div>
+                <div id="cloudsContainer"></div>
+            </div>
+
             <div class="results-section">
                 <div id="fateDisplay" class="fate-display">The Spinner is ready...</div>
                 <div id="winnerBanner" class="winner-banner"></div>
@@ -723,6 +821,7 @@
         const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7', '#10b981', '#ec4899'];
         let currentRotation = 0;
         let selectedGameMode = '';
+        let runnerInterval = null;
 
         function selectMode(mode) {
             selectedGameMode = mode;
@@ -735,6 +834,7 @@
             const spinnerContainer = document.getElementById('spinnerContainer');
             const diceScene = document.getElementById('diceScene');
             const oracleContainer = document.getElementById('oracleContainer');
+            const lightningArena = document.getElementById('lightningArena');
             const actionBtn = document.getElementById('actionBtn');
             const screenTitle = document.getElementById('screenTitle');
             const screenSubtitle = document.getElementById('screenSubtitle');
@@ -743,6 +843,8 @@
             diceScene.style.display = 'none';
             oracleContainer.style.display = 'none';
             oracleContainer.classList.remove('thinking');
+            lightningArena.style.display = 'none';
+            stopRunnerMovement();
 
             if (mode === 'spinner') {
                 spinnerContainer.style.display = 'block';
@@ -759,6 +861,11 @@
                 actionBtn.textContent = 'Consult the Oracle Cat!';
                 screenTitle.textContent = 'Oracle Cat Showdown';
                 screenSubtitle.textContent = 'Watch the wizard cat gaze into its mystical orb to reveal the true champion!';
+            } else if (mode === 'lightning') {
+                lightningArena.style.display = 'block';
+                actionBtn.textContent = 'Unleash Lightning!';
+                screenTitle.textContent = 'Lightning Draw Showdown';
+                screenSubtitle.textContent = 'Assign each team to a storm cloud and select which cloud strikes the running character first!';
             }
 
             renderInputs();
@@ -773,7 +880,9 @@
             document.getElementById('spinnerContainer').style.display = 'none';
             document.getElementById('diceScene').style.display = 'none';
             document.getElementById('oracleContainer').style.display = 'none';
+            document.getElementById('lightningArena').style.display = 'none';
             document.getElementById('fateDisplay').textContent = "Ready...";
+            stopRunnerMovement();
         }
 
         function renderInputs() {
@@ -798,21 +907,39 @@
                             <option value="6">Side 6</option>
                         </select>
                     `;
+                } else if (selectedGameMode === 'lightning') {
+                    header.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
+                    extraContent = `
+                        <select id="lightning-choice-${i}">
+                            <option value="${i}">Cloud ${i + 1}</option>
+                        </select>
+                    `;
                 } else {
                     header.style.gridTemplateColumns = '2fr 1fr 1fr';
                 }
 
                 grid.innerHTML += `
                     <div class="team-card" style="--team-color: ${teamColors[i]}; grid-template-columns: ${header.style.gridTemplateColumns};">
-                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelSlices()">
+                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateDynamicElements()">
                         <input type="number" id="points-${i}" placeholder="Points">
                         <input type="number" id="wager-${i}" placeholder="Wager">
                         ${extraContent}
                     </div>
                 `;
             }
+
             if (selectedGameMode === 'spinner') {
                 updateWheelSlices();
+            } else if (selectedGameMode === 'lightning') {
+                updateLightningClouds();
+            }
+        }
+
+        function updateDynamicElements() {
+            if (selectedGameMode === 'spinner') {
+                updateWheelSlices();
+            } else if (selectedGameMode === 'lightning') {
+                updateLightningClouds();
             }
         }
 
@@ -844,6 +971,67 @@
             }
         }
 
+        function updateLightningClouds() {
+            if (selectedGameMode !== 'lightning') return;
+            const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
+            const cloudsContainer = document.getElementById('cloudsContainer');
+            cloudsContainer.innerHTML = '';
+
+            const spacing = 100 / (numTeams + 1);
+
+            for (let i = 0; i < numTeams; i++) {
+                const nameInput = document.getElementById(`name-${i}`);
+                const teamName = (nameInput && nameInput.value.trim()) || `Team ${i + 1}`;
+                const leftPos = spacing * (i + 1);
+
+                const cloud = document.createElement('div');
+                cloud.className = 'cloud-element';
+                cloud.style.left = `calc(${leftPos}% - 32px)`;
+                cloud.style.setProperty('--cloud-color', teamColors[i]);
+                cloud.textContent = `C${i + 1}`;
+                cloud.title = teamName;
+                cloudsContainer.appendChild(cloud);
+
+                // Update select dropdown option label
+                const selectElem = document.getElementById(`lightning-choice-${i}`);
+                if (selectElem) {
+                    selectElem.innerHTML = '';
+                    for (let c = 0; c < numTeams; c++) {
+                        const opt = document.createElement('option');
+                        opt.value = c;
+                        opt.textContent = `Cloud ${c + 1}`;
+                        if (c === i) opt.selected = true;
+                        selectElem.appendChild(opt);
+                    }
+                }
+            }
+
+            setupRunnerMovement();
+        }
+
+        function setupRunnerMovement() {
+            const runner = document.getElementById('runnerCharacter');
+            runner.style.left = '50%';
+            stopRunnerMovement();
+
+            let direction = 1;
+            let currentPos = 50;
+
+            runnerInterval = setInterval(() => {
+                currentPos += direction * 1.5;
+                if (currentPos > 85) direction = -1;
+                if (currentPos < 15) direction = 1;
+                runner.style.left = `${currentPos}%`;
+            }, 50);
+        }
+
+        function stopRunnerMovement() {
+            if (runnerInterval) {
+                clearInterval(runnerInterval);
+                runnerInterval = null;
+            }
+        }
+
         function runShowdown() {
             const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
             const teams = [];
@@ -854,11 +1042,15 @@
                 const wager = parseFloat(document.getElementById(`wager-${i}`).value) || 0;
                 
                 let diceChoice = 1;
+                let lightningChoice = 0;
+
                 if (selectedGameMode === 'dice') {
                     diceChoice = parseInt(document.getElementById(`dice-choice-${i}`).value);
+                } else if (selectedGameMode === 'lightning') {
+                    lightningChoice = parseInt(document.getElementById(`lightning-choice-${i}`).value);
                 }
 
-                teams.push({ name, points, wager, diceChoice, color: teamColors[i], index: i });
+                teams.push({ name, points, wager, diceChoice, lightningChoice, color: teamColors[i], index: i });
             }
 
             if (selectedGameMode === 'spinner') {
@@ -925,6 +1117,33 @@
                     const winningIndex = Math.floor(Math.random() * numTeams);
                     finalizeWinnerResults(teams, winningIndex);
                 }, 2500);
+
+            } else if (selectedGameMode === 'lightning') {
+                fateDisplay.textContent = "⚡ The runner is dashing! Which cloud will strike first?";
+                
+                // Pick random winning cloud
+                const winningCloudIndex = Math.floor(Math.random() * numTeams);
+                
+                // Position runner directly under the winning cloud before striking
+                const spacing = 100 / (numTeams + 1);
+                const targetLeftPos = spacing * (winningCloudIndex + 1);
+                
+                stopRunnerMovement();
+                const runner = document.getElementById('runnerCharacter');
+                runner.style.left = `${targetLeftPos}%`;
+
+                setTimeout(() => {
+                    // Strike lightning from that cloud
+                    const bolt = document.getElementById('lightningBolt');
+                    bolt.style.left = `calc(${targetLeftPos}% - 3px)`;
+                    bolt.style.height = '150px';
+                    bolt.style.display = 'block';
+
+                    setTimeout(() => {
+                        bolt.style.display = 'none';
+                        finalizeLightningResults(teams, winningCloudIndex);
+                    }, 600);
+                }, 800);
             }
         }
 
@@ -1012,6 +1231,56 @@
 
             scoreList.innerHTML = scoreHTML;
             scoreboard.style.display = 'block';
+        }
+
+        function finalizeLightningResults(teams, winningCloudIndex) {
+            const fateDisplay = document.getElementById('fateDisplay');
+            const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            const scoreList = document.getElementById('scoreList');
+
+            fateDisplay.textContent = `⚡ Cloud ${winningCloudIndex + 1} struck the runner first!`;
+            
+            let winnersText = [];
+            let scoreHTML = '';
+
+            teams.forEach((team) => {
+                let finalPoints = team.points;
+                let pointDiffHTML = '';
+                const isWinner = team.lightningChoice === winningCloudIndex;
+
+                if (isWinner) {
+                    finalPoints += team.wager;
+                    winnersText.push(team.name);
+                    pointDiffHTML = `<span class="points-won">+${team.wager} pts (Correct Cloud) (Total: ${finalPoints})</span>`;
+                } else {
+                    finalPoints -= team.wager;
+                    pointDiffHTML = `<span class="points-lost">-${team.wager} pts (Incorrect Cloud) (Total: ${finalPoints})</span>`;
+                }
+
+                scoreHTML += `
+                    <div class="score-item" style="--team-color: ${team.color};">
+                        <strong>${team.name}</strong>
+                        <div>${pointDiffHTML}</div>
+                    </div>
+                `;
+            });
+
+            winnerBanner.style.display = 'block';
+            winnerBanner.style.setProperty('--winner-color-1', '#facc15');
+            winnerBanner.style.setProperty('--winner-color-2', '#1e293b');
+
+            if (winnersText.length > 0) {
+                winnerBanner.innerHTML = `⚡ Successful Predictions: ${winnersText.join(', ')}`;
+            } else {
+                winnerBanner.innerHTML = `⚠️ No teams correctly predicted Cloud ${winningCloudIndex + 1}!`;
+            }
+
+            scoreList.innerHTML = scoreHTML;
+            scoreboard.style.display = 'block';
+            
+            // Resume runner wandering for next round
+            setupRunnerMovement();
         }
     </script>
 </body>
