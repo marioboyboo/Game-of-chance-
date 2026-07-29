@@ -151,7 +151,7 @@
             border-radius: 10px;
             padding: 15px;
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
             gap: 10px;
             align-items: center;
             border-left: 6px solid var(--team-color);
@@ -162,31 +162,13 @@
 
         .team-card-header {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
             gap: 10px;
             margin-bottom: 8px;
             font-weight: 600;
             color: var(--text-muted);
             font-size: 0.85rem;
             text-transform: uppercase;
-        }
-
-        .dice-selection-container {
-            background-color: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 25px;
-            display: none;
-        }
-
-        .dice-selection-container label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 8px;
         }
 
         input, select {
@@ -433,26 +415,15 @@
                 "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
             </a>
 
-            <div class="dice-selection-container" id="diceSelectionContainer">
-                <label for="diceSideSelect">Select Your Winning Side (1 - 6)</label>
-                <select id="diceSideSelect">
-                    <option value="1">Side 1</option>
-                    <option value="2">Side 2</option>
-                    <option value="3">Side 3</option>
-                    <option value="4">Side 4</option>
-                    <option value="5">Side 5</option>
-                    <option value="6">Side 6</option>
-                </select>
-            </div>
-
-            <div class="team-card-header">
+            <div class="team-card-header" id="teamCardHeader">
                 <div>Team Name</div>
                 <div>Points</div>
                 <div>Wager</div>
+                <div id="headerExtra">Choice</div>
             </div>
 
             <div class="team-grid" id="teamGrid">
-                <!-- Dynamically populated empty inputs via JavaScript -->
+                <!-- Dynamically populated inputs via JavaScript -->
             </div>
 
             <button class="btn" id="actionBtn" onclick="runShowdown()">Spin the Wheel!</button>
@@ -486,7 +457,6 @@
 
         function selectMode(mode) {
             selectedGameMode = mode;
-            console.log('Mode selected:', mode);
             
             document.getElementById('selectionScreen').classList.remove('active');
             document.getElementById('selectionScreen').style.display='none';
@@ -494,23 +464,24 @@
             document.getElementById('mainScreen').style.display='block';
 
             const spinnerContainer = document.getElementById('spinnerContainer');
-            const diceContainer = document.getElementById('diceSelectionContainer');
             const actionBtn = document.getElementById('actionBtn');
             const screenTitle = document.getElementById('screenTitle');
             const screenSubtitle = document.getElementById('screenSubtitle');
+            const headerExtra = document.getElementById('headerExtra');
 
             if (mode === 'spinner') {
                 spinnerContainer.style.display = 'block';
-                diceContainer.style.display = 'none';
                 actionBtn.textContent = 'Spin the Wheel!';
                 screenTitle.textContent = 'Team Wager Showdown';
                 screenSubtitle.textContent = 'Enter your teams, current stats, and spin the wheel to decide the champion!';
+                headerExtra.style.display = 'none';
             } else if (mode === 'dice') {
                 spinnerContainer.style.display = 'none';
-                diceContainer.style.display = 'block';
                 actionBtn.textContent = 'Roll the Dice!';
                 screenTitle.textContent = 'Mystery Roll Showdown';
-                screenSubtitle.textContent = 'Enter your teams, choose your lucky dice side, and roll to win!';
+                screenSubtitle.textContent = 'Enter your teams, choose each team\'s target dice side, and roll to win!';
+                headerExtra.style.display = 'block';
+                headerExtra.textContent = 'Side (1-6)';
             }
 
             renderInputs();
@@ -523,26 +494,52 @@
             document.getElementById('winnerBanner').style.display = 'none';
             document.getElementById('scoreboard').style.display = 'none';
             document.getElementById('spinnerContainer').style.display = 'none';
-            document.getElementById('diceSelectionContainer').style.display = 'none';
             document.getElementById('fateDisplay').textContent = "Ready...";
         }
 
         function renderInputs() {
             const grid = document.getElementById('teamGrid');
+            const header = document.getElementById('teamCardHeader');
             grid.innerHTML = '';
-            for (let i = 0; i < 4; i++) {
-                grid.innerHTML += `
-                    <div class="team-card" style="--team-color: ${teamColors[i]};">
-                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelText()">
-                        <input type="number" id="points-${i}" placeholder="Points">
-                        <input type="number" id="wager-${i}" placeholder="Wager">
-                    </div>
-                `;
+
+            if (selectedGameMode === 'spinner') {
+                header.style.gridTemplateColumns = '2fr 1fr 1fr';
+                document.getElementById('headerExtra').style.display = 'none';
+                for (let i = 0; i < 4; i++) {
+                    grid.innerHTML += `
+                        <div class="team-card" style="--team-color: ${teamColors[i]}; grid-template-columns: 2fr 1fr 1fr;">
+                            <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelText()">
+                            <input type="number" id="points-${i}" placeholder="Points">
+                            <input type="number" id="wager-${i}" placeholder="Wager">
+                        </div>
+                    `;
+                }
+            } else if (selectedGameMode === 'dice') {
+                header.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
+                document.getElementById('headerExtra').style.display = 'block';
+                for (let i = 0; i < 4; i++) {
+                    grid.innerHTML += `
+                        <div class="team-card" style="--team-color: ${teamColors[i]};">
+                            <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name">
+                            <input type="number" id="points-${i}" placeholder="Points">
+                            <input type="number" id="wager-${i}" placeholder="Wager">
+                            <select id="dice-choice-${i}">
+                                <option value="1">Side 1</option>
+                                <option value="2">Side 2</option>
+                                <option value="3">Side 3</option>
+                                <option value="4">Side 4</option>
+                                <option value="5">Side 5</option>
+                                <option value="6">Side 6</option>
+                            </select>
+                        </div>
+                    `;
+                }
             }
             updateWheelText();
         }
 
         function updateWheelText() {
+            if (selectedGameMode !== 'spinner') return;
             for (let i = 0; i < 4; i++) {
                 const nameInput = document.getElementById(`name-${i}`);
                 const sliceText = document.getElementById(`slice-text-${i}`);
@@ -560,7 +557,13 @@
                 const name = nameInput.value.trim() || `Team ${i + 1}`;
                 const points = parseFloat(document.getElementById(`points-${i}`).value) || 0;
                 const wager = parseFloat(document.getElementById(`wager-${i}`).value) || 0;
-                teams.push({ name, points, wager, color: teamColors[i], index: i });
+                
+                let diceChoice = 1;
+                if (selectedGameMode === 'dice') {
+                    diceChoice = parseInt(document.getElementById(`dice-choice-${i}`).value);
+                }
+
+                teams.push({ name, points, wager, diceChoice, color: teamColors[i], index: i });
             }
 
             updateWheelText();
@@ -568,15 +571,12 @@
             const fateDisplay = document.getElementById('fateDisplay');
             const winnerBanner = document.getElementById('winnerBanner');
             const scoreboard = document.getElementById('scoreboard');
-            const scoreList = document.getElementById('scoreList');
             
             winnerBanner.style.display = 'none';
             scoreboard.style.display = 'none';
 
-            let winningIndex = 0;
-
             if (selectedGameMode === 'spinner') {
-                winningIndex = Math.floor(Math.random() * 4);
+                const winningIndex = Math.floor(Math.random() * 4);
                 const spins = 5; 
                 const degreesPerSlice = 90;
                 
@@ -589,23 +589,20 @@
                 fateDisplay.textContent = "The wheel is spinning...";
 
                 setTimeout(() => {
-                    finalizeResults(teams, winningIndex);
+                    finalizeSpinnerResults(teams, winningIndex);
                 }, 7000);
 
             } else if (selectedGameMode === 'dice') {
-                const chosenSide = parseInt(document.getElementById('diceSideSelect').value);
                 const rolledSide = Math.floor(Math.random() * 6) + 1;
-                winningIndex = Math.floor(Math.random() * 4);
-
-                fateDisplay.textContent = `🎲 You chose Side ${chosenSide}. The dice rolled a ${rolledSide}!`;
+                fateDisplay.textContent = `🎲 The dice rolled a ${rolledSide}! Checking team predictions...`;
 
                 setTimeout(() => {
-                    finalizeResults(teams, winningIndex);
-                }, 1000);
+                    finalizeDiceResults(teams, rolledSide);
+                }, 1500);
             }
         }
 
-        function finalizeResults(teams, winningIndex) {
+        function finalizeSpinnerResults(teams, winningIndex) {
             const winner = teams[winningIndex];
             const fateDisplay = document.getElementById('fateDisplay');
             const winnerBanner = document.getElementById('winnerBanner');
@@ -639,6 +636,53 @@
                     </div>
                 `;
             });
+
+            scoreList.innerHTML = scoreHTML;
+            scoreboard.style.display = 'block';
+        }
+
+        function finalizeDiceResults(teams, rolledSide) {
+            const fateDisplay = document.getElementById('fateDisplay');
+            const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            const scoreList = document.getElementById('scoreList');
+
+            fateDisplay.textContent = `🎲 Dice Roll Result: Side ${rolledSide}`;
+            
+            let winnersText = [];
+            let scoreHTML = '';
+
+            teams.forEach((team) => {
+                let finalPoints = team.points;
+                let pointDiffHTML = '';
+                const isWinner = team.diceChoice === rolledSide;
+
+                if (isWinner) {
+                    finalPoints += team.wager;
+                    winnersText.push(team.name);
+                    pointDiffHTML = `<span class="points-won">+${team.wager} pts (Guessed Side ${rolledSide}) (Total: ${finalPoints})</span>`;
+                } else {
+                    finalPoints -= team.wager;
+                    pointDiffHTML = `<span class="points-lost">-${team.wager} pts (Guessed Side ${team.diceChoice}) (Total: ${finalPoints})</span>`;
+                }
+
+                scoreHTML += `
+                    <div class="score-item" style="--team-color: ${team.color};">
+                        <strong>${team.name}</strong>
+                        <div>${pointDiffHTML}</div>
+                    </div>
+                `;
+            });
+
+            winnerBanner.style.display = 'block';
+            winnerBanner.style.setProperty('--winner-color-1', '#38bdf8');
+            winnerBanner.style.setProperty('--winner-color-2', '#1e293b');
+
+            if (winnersText.length > 0) {
+                winnerBanner.innerHTML = `🎉 Correct Predictions: ${winnersText.join(', ')}`;
+            } else {
+                winnerBanner.innerHTML = `⚠️ No teams correctly guessed Side ${rolledSide}!`;
+            }
 
             scoreList.innerHTML = scoreHTML;
             scoreboard.style.display = 'block';
