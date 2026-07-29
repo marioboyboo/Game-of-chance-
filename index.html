@@ -8,13 +8,17 @@
         :root {
             --bg-color: #0f172a;
             --card-bg: #1e293b;
-            --accent: #38bdf8;
-            --accent-hover: #0ea5e9;
             --success: #22c55e;
             --danger: #ef4444;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #334155;
+            
+            /* Team Unique Colors */
+            --team-0: #38bdf8; /* Blue */
+            --team-1: #f43f5e; /* Rose */
+            --team-2: #fbbf24; /* Amber */
+            --team-3: #a855f7; /* Purple */
         }
 
         body {
@@ -42,7 +46,7 @@
         h1 {
             text-align: center;
             margin-bottom: 8px;
-            color: var(--accent);
+            color: var(--text-main);
         }
 
         .subtitle {
@@ -63,7 +67,7 @@
         }
 
         .prompt-box strong {
-            color: var(--accent);
+            color: var(--text-main);
             display: block;
             margin-bottom: 4px;
         }
@@ -77,13 +81,16 @@
 
         .team-card {
             background-color: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
             border-radius: 10px;
             padding: 15px;
             display: grid;
             grid-template-columns: 2fr 1fr 1fr;
             gap: 10px;
             align-items: center;
+            border-left: 6px solid var(--team-color);
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
         }
 
         .team-card-header {
@@ -110,24 +117,24 @@
 
         input:focus {
             outline: none;
-            border-color: var(--accent);
+            border-color: var(--team-color);
         }
 
         .btn {
             width: 100%;
             padding: 14px;
-            background-color: var(--accent);
+            background: linear-gradient(135deg, var(--team-0), var(--team-3));
             color: #0f172a;
             border: none;
             border-radius: 8px;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: transform 0.1s, opacity 0.2s;
         }
 
         .btn:hover {
-            background-color: var(--accent-hover);
+            opacity: 0.9;
         }
 
         .btn:active {
@@ -149,7 +156,7 @@
         }
 
         .winner-banner {
-            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            background: linear-gradient(135deg, var(--winner-color-1, #38bdf8), var(--winner-color-2, #6366f1));
             color: white;
             padding: 20px;
             border-radius: 10px;
@@ -173,7 +180,7 @@
 
         .scoreboard h3 {
             margin-top: 0;
-            color: var(--accent);
+            color: var(--text-main);
             font-size: 1.1rem;
             border-bottom: 1px solid var(--border);
             padding-bottom: 8px;
@@ -183,13 +190,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            background-color: rgba(15, 23, 42, 0.4);
+            border-left: 5px solid var(--team-color);
             font-size: 0.95rem;
-        }
-
-        .score-item:last-child {
-            border-bottom: none;
         }
 
         .points-won {
@@ -252,44 +258,52 @@
     </div>
 
     <script>
+        const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7'];
+
         // 4 Destinies/Mechanisms of Chance
         const fateTwists = [
             (teams) => {
-                const winner = teams[Math.floor(Math.random() * teams.length)];
-                return { twist: "⚡ Fate Twist: Pure Random Luck Strike!", winner };
+                const index = Math.floor(Math.random() * teams.length);
+                return { twist: "⚡ Fate Twist: Pure Random Luck Strike!", winner: teams[index], index };
             },
             (teams) => {
-                let highest = teams.reduce((prev, current) => (current.wager > prev.wager) ? current : prev);
-                return { twist: "💰 Fate Twist: High Roller Payoff (Highest Wager Wins)!", winner: highest };
+                let highestIdx = 0;
+                for (let i = 1; i < teams.length; i++) {
+                    if (teams[i].wager > teams[highestIdx].wager) highestIdx = i;
+                }
+                return { twist: "💰 Fate Twist: High Roller Payoff (Highest Wager Wins)!", winner: teams[highestIdx], index: highestIdx };
             },
             (teams) => {
-                let lowest = teams.reduce((prev, current) => (current.points < prev.points) ? current : prev);
-                return { twist: "🛡️ Fate Twist: Underdog Upset (Lowest Points Wins)!", winner: lowest };
+                let lowestIdx = 0;
+                for (let i = 1; i < teams.length; i++) {
+                    if (teams[i].points < teams[lowestIdx].points) lowestIdx = i;
+                }
+                return { twist: "🛡️ Fate Twist: Underdog Upset (Lowest Points Wins)!", winner: teams[lowestIdx], index: lowestIdx };
             },
             (teams) => {
                 let totalPoints = teams.reduce((sum, t) => sum + t.points, 0);
                 let randomVal = Math.random() * (totalPoints || 4);
                 let currentSum = 0;
-                let winner = teams[0];
+                let winnerIdx = 0;
                 
-                for (let t of teams) {
-                    currentSum += (t.points > 0 ? t.points : 1);
+                for (let i = 0; i < teams.length; i++) {
+                    currentSum += (teams[i].points > 0 ? teams[i].points : 1);
                     if (randomVal <= currentSum) {
-                        winner = t;
+                        winnerIdx = i;
                         break;
                     }
                 }
-                return { twist: "⚖️ Fate Twist: Momentum Shift (Point-Weighted Lottery)!", winner };
+                return { twist: "⚖️ Fate Twist: Momentum Shift (Point-Weighted Lottery)!", winner: teams[winnerIdx], index: winnerIdx };
             }
         ];
 
-        // Initialize 4 blank input rows
+        // Initialize 4 blank input rows with unique team colors
         function renderInputs() {
             const grid = document.getElementById('teamGrid');
             grid.innerHTML = '';
             for (let i = 0; i < 4; i++) {
                 grid.innerHTML += `
-                    <div class="team-card">
+                    <div class="team-card" style="--team-color: ${teamColors[i]};">
                         <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name">
                         <input type="number" id="points-${i}" placeholder="Points">
                         <input type="number" id="wager-${i}" placeholder="Wager">
@@ -304,7 +318,7 @@
                 const name = document.getElementById(`name-${i}`).value.trim() || `Team ${i + 1}`;
                 const points = parseFloat(document.getElementById(`points-${i}`).value) || 0;
                 const wager = parseFloat(document.getElementById(`wager-${i}`).value) || 0;
-                teams.push({ name, points, wager });
+                teams.push({ name, points, wager, color: teamColors[i], index: i });
             }
 
             const fateDisplay = document.getElementById('fateDisplay');
@@ -331,17 +345,22 @@
             // Pick a random fate mechanism out of the 4
             const selectedTwistFunction = fateTwists[Math.floor(Math.random() * fateTwists.length)];
             const result = selectedTwistFunction(teams);
+            const winnerTeam = result.winner;
+
+            // Set dynamic gradient colors based on winner
+            winnerBanner.style.setProperty('--winner-color-1', winnerTeam.color);
+            winnerBanner.style.setProperty('--winner-color-2', teamColors[(result.index + 2) % 4]);
 
             // Output results
             fateDisplay.textContent = result.twist;
             winnerBanner.style.display = 'block';
             winnerBanner.innerHTML = `
-                🏆 Winner: ${result.winner.name}!<br>
+                🏆 Winner: <span style="color: #fff; text-decoration: underline;">${winnerTeam.name}</span>!<br>
                 <div style="font-size: 1rem; font-weight: normal; margin-top: 8px; line-height: 1.5;">
                     • Winning Team Stats:<br>
-                    - Name: <strong>${result.winner.name}</strong><br>
-                    - Points: <strong>${result.winner.points}</strong><br>
-                    - Wager: <strong>${result.winner.wager}</strong>
+                    - Name: <strong>${winnerTeam.name}</strong><br>
+                    - Points: <strong>${winnerTeam.points}</strong><br>
+                    - Wager: <strong>${winnerTeam.wager}</strong>
                 </div>
             `;
 
@@ -349,15 +368,15 @@
             scoreList.innerHTML = '';
             teams.forEach(team => {
                 let diffText = '';
-                if (team.name === result.winner.name) {
+                if (team.name === winnerTeam.name) {
                     diffText = `<span class="points-won">+${team.wager} pts (Won)</span>`;
                 } else {
                     diffText = `<span class="points-lost">-${team.wager} pts (Lost)</span>`;
                 }
 
                 scoreList.innerHTML += `
-                    <div class="score-item">
-                        <span><strong>${team.name}</strong> (Base Points: ${team.points}, Wager: ${team.wager})</span>
+                    <div class="score-item" style="--team-color: ${team.color};">
+                        <span><strong>${team.name}</strong> (Points: ${team.points}, Wager: ${team.wager})</span>
                         ${diffText}
                     </div>
                 `;
