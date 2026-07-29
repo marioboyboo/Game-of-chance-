@@ -403,11 +403,11 @@
             <div class="subtitle">Choose how you want the champion to be decided!</div>
 
             <div class="mode-grid">
-                <div class="mode-card" id="cardSpinner">
+                <div class="mode-card" onclick="selectMode('spinner')">
                     <h3>🎡 Spinning Wheel</h3>
                     <p>Spin the wheel of fortune to choose the winner.</p>
                 </div>
-                <div class="mode-card" id="cardDice">
+                <div class="mode-card" onclick="selectMode('dice')">
                     <h3>🎲 Mystery Roll</h3>
                     <p>Roll the dice and pick your side!</p>
                 </div>
@@ -424,7 +424,7 @@
 
         <!-- SCREEN 2: Main Game Screen -->
         <div id="mainScreen" class="screen">
-            <button class="back-btn" id="backBtn">← Back to Selection</button>
+            <button class="back-btn" onclick="goBackToSelection()">← Back to Selection</button>
             <h1 id="screenTitle">Team Wager Showdown</h1>
             <div class="subtitle" id="screenSubtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
 
@@ -455,7 +455,7 @@
                 <!-- Dynamically populated empty inputs via JavaScript -->
             </div>
 
-            <button class="btn" id="actionBtn">Spin the Wheel!</button>
+            <button class="btn" id="actionBtn" onclick="runShowdown()">Spin the Wheel!</button>
 
             <div class="spinner-container" id="spinnerContainer">
                 <div class="spinner-pointer"></div>
@@ -483,25 +483,6 @@
         const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7'];
         let currentRotation = 0;
         let selectedGameMode = '';
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const cardSpinner = document.getElementById('cardSpinner');
-            const cardDice = document.getElementById('cardDice');
-            const backBtn = document.getElementById('backBtn');
-            const actionBtn = document.getElementById('actionBtn');
-
-            cardSpinner.addEventListener('click', (e) => { e.preventDefault(); selectMode('spinner'); });
-            cardSpinner.addEventListener('touchend', (e) => { e.preventDefault(); selectMode('spinner'); });
-
-            cardDice.addEventListener('click', (e) => { e.preventDefault(); selectMode('dice'); });
-            cardDice.addEventListener('touchend', (e) => { e.preventDefault(); selectMode('dice'); });
-
-            backBtn.addEventListener('click', (e) => { e.preventDefault(); goBackToSelection(); });
-            backBtn.addEventListener('touchend', (e) => { e.preventDefault(); goBackToSelection(); });
-
-            actionBtn.addEventListener('click', (e) => { e.preventDefault(); runShowdown(); });
-            actionBtn.addEventListener('touchend', (e) => { e.preventDefault(); runShowdown(); });
-        });
 
         function selectMode(mode) {
             selectedGameMode = mode;
@@ -549,15 +530,11 @@
             for (let i = 0; i < 4; i++) {
                 grid.innerHTML += `
                     <div class="team-card" style="--team-color: ${teamColors[i]};">
-                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name">
+                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateWheelText()">
                         <input type="number" id="points-${i}" placeholder="Points">
                         <input type="number" id="wager-${i}" placeholder="Wager">
                     </div>
                 `;
-            }
-            
-            for (let i = 0; i < 4; i++) {
-                document.getElementById(`name-${i}`).addEventListener('input', updateWheelText);
             }
             updateWheelText();
         }
@@ -585,4 +562,32 @@
 
             updateWheelText();
 
-         
+            const fateDisplay = document.getElementById('fateDisplay');
+            const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            const scoreList = document.getElementById('scoreList');
+            
+            winnerBanner.style.display = 'none';
+            scoreboard.style.display = 'none';
+
+            let winningIndex = 0;
+
+            if (selectedGameMode === 'spinner') {
+                winningIndex = Math.floor(Math.random() * 4);
+                const spins = 5; 
+                const degreesPerSlice = 90;
+                
+                const targetDegree = currentRotation + (360 * spins) + (360 - (winningIndex * degreesPerSlice)) - (currentRotation % 360);
+                currentRotation = targetDegree;
+
+                const spinnerWheel = document.getElementById('spinnerWheel');
+                spinnerWheel.style.transform = `rotate(${currentRotation}deg)`;
+
+                fateDisplay.textContent = "The wheel is spinning...";
+
+                setTimeout(() => {
+                    finalizeResults(teams, winningIndex);
+                }, 7000);
+
+            } else if (selectedGameMode === 'dice') {
+             
