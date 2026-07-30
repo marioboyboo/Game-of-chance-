@@ -95,6 +95,15 @@
             margin-bottom: 4px;
         }
 
+        .prompt-content {
+            display: none;
+            margin-top: 8px;
+            color: var(--text-main);
+            font-style: italic;
+            border-top: 1px solid var(--border);
+            padding-top: 8px;
+        }
+
         /* Selection Screen Styles */
         .mode-grid {
             display: grid;
@@ -796,10 +805,12 @@
             <h1 id="screenTitle">Team Wager Showdown</h1>
             <div class="subtitle" id="screenSubtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
 
-            <a href="https://share.gemini.google/IfRuJEeva0d2" target="_blank" class="prompt-box">
-                <strong>Original Prompt Used:</strong>
-                "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
-            </a>
+            <div class="prompt-box" onclick="togglePromptExpansion()">
+                <strong>Original Prompt Used (Click to Expand):</strong>
+                <div class="prompt-content" id="promptContentText">
+                    "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
+                </div>
+            </div>
 
             <div class="setup-section">
                 <label for="numTeamsSelect">Number of Teams (2 - 6)</label>
@@ -900,6 +911,15 @@
         let runnerMovementTimer = null;
         let persistentScores = {}; // Stores latest points for team names across rounds
 
+        function togglePromptExpansion() {
+            const content = document.getElementById('promptContentText');
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
+        }
+
         function selectMode(mode) {
             selectedGameMode = mode;
             
@@ -976,7 +996,7 @@
             }
 
             let html = '';
-            teamNames.forEach((name, idx) => {
+            teamNames.forEach((name) => {
                 const data = persistentScores[name];
                 html += `
                     <div class="score-item" style="--team-color: ${data.color};">
@@ -1023,7 +1043,6 @@
                     header.style.gridTemplateColumns = '2fr 1fr 1fr';
                 }
 
-                // Pre-fill persistent score if available
                 let defaultName = `Team ${i + 1}`;
                 let defaultPoints = '';
                 if (persistentScores[defaultName]) {
@@ -1098,7 +1117,6 @@
                 const teamName = (nameInput && nameInput.value.trim()) || `Team ${i + 1}`;
                 const leftPos = spacing * (i + 1);
 
-                // Create Cloud
                 const cloud = document.createElement('div');
                 cloud.className = 'storm-cloud';
                 cloud.id = `cloud-${i}`;
@@ -1108,14 +1126,12 @@
                 cloud.title = teamName;
                 cloudsContainer.appendChild(cloud);
 
-                // Create Tree underneath/near cloud position
                 const tree = document.createElement('div');
                 tree.className = 'tree-element';
                 tree.style.left = `calc(${leftPos}% + 15px)`;
                 tree.innerHTML = '<div class="tree-trunk"></div><div class="tree-leaves"></div>';
                 treesContainer.appendChild(tree);
 
-                // Update select dropdown option label
                 const selectElem = document.getElementById(`lightning-choice-${i}`);
                 if (selectElem) {
                     selectElem.innerHTML = '';
@@ -1129,7 +1145,6 @@
                 }
             }
 
-            // Set runner to center initially
             const runner = document.getElementById('runnerCharacter');
             runner.style.left = '50%';
         }
