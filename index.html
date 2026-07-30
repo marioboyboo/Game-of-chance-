@@ -47,6 +47,17 @@
             border-radius: 16px;
             padding: 30px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        /* Fullscreen state when original prompt is expanded */
+        .container.expanded-prompt-mode {
+            max-width: 100vw;
+            min-height: 100vh;
+            border-radius: 0;
+            border: none;
+            padding: 40px;
+            box-sizing: border-box;
         }
 
         .screen {
@@ -82,6 +93,19 @@
             transition: border-color 0.2s, background-color 0.2s;
             text-decoration: none;
             display: block;
+            position: relative;
+            max-height: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .prompt-box.expanded {
+            max-height: none;
+            font-size: 1.15rem;
+            padding: 25px;
+            background-color: rgba(15, 23, 42, 0.98);
+            border-color: var(--team-0);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         }
 
         .prompt-box:hover {
@@ -93,15 +117,6 @@
             color: var(--text-main);
             display: block;
             margin-bottom: 4px;
-        }
-
-        .prompt-content {
-            display: none;
-            margin-top: 8px;
-            color: var(--text-main);
-            font-style: italic;
-            border-top: 1px solid var(--border);
-            padding-top: 8px;
         }
 
         /* Selection Screen Styles */
@@ -751,7 +766,7 @@
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="mainContainer">
         <!-- SCREEN 1: Selection Menu -->
         <div id="selectionScreen" class="screen active">
             <h1>Select Winning Mechanism</h1>
@@ -805,11 +820,9 @@
             <h1 id="screenTitle">Team Wager Showdown</h1>
             <div class="subtitle" id="screenSubtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
 
-            <div class="prompt-box" onclick="togglePromptExpansion()">
-                <strong>Original Prompt Used (Click to Expand):</strong>
-                <div class="prompt-content" id="promptContentText">
-                    "Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"
-                </div>
+            <div id="promptBox" class="prompt-box" onclick="togglePromptExpand(event)">
+                <strong>Original Prompt Used (Click to expand fullscreen):</strong>
+                <span id="promptText">"Make a game of chance website were you enter in 4 teams name and amount of points they have and are wagering then it chooses from 4 things to choose who wins (you choose what) and then it shows who won"</span>
             </div>
 
             <div class="setup-section">
@@ -911,12 +924,18 @@
         let runnerMovementTimer = null;
         let persistentScores = {}; // Stores latest points for team names across rounds
 
-        function togglePromptExpansion() {
-            const content = document.getElementById('promptContentText');
-            if (content.style.display === 'block') {
-                content.style.display = 'none';
+        function togglePromptExpand(event) {
+            event.stopPropagation();
+            const promptBox = document.getElementById('promptBox');
+            const container = document.getElementById('mainContainer');
+            
+            promptBox.classList.toggle('expanded');
+            container.classList.toggle('expanded-prompt-mode');
+
+            if (promptBox.classList.contains('expanded')) {
+                promptBox.querySelector('strong').textContent = 'Original Prompt Used (Click anywhere inside to collapse):';
             } else {
-                content.style.display = 'block';
+                promptBox.querySelector('strong').textContent = 'Original Prompt Used (Click to expand fullscreen):';
             }
         }
 
@@ -969,6 +988,13 @@
         }
 
         function goBackToSelection() {
+            // Collapse prompt view if it was expanded
+            const promptBox = document.getElementById('promptBox');
+            const container = document.getElementById('mainContainer');
+            promptBox.classList.remove('expanded');
+            container.classList.remove('expanded-prompt-mode');
+            promptBox.querySelector('strong').textContent = 'Original Prompt Used (Click to expand fullscreen):';
+
             document.getElementById('mainScreen').classList.remove('active');
             document.getElementById('selectionScreen').classList.add('active');
             document.getElementById('selectionScreen').style.display = 'block';
