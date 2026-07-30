@@ -131,6 +131,16 @@
             font-size: 0.85rem;
         }
 
+        .mode-card.coming-soon {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+        .mode-card.coming-soon:hover {
+            border-color: var(--border);
+            transform: none;
+        }
+
         .setup-section {
             background-color: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border);
@@ -625,7 +635,7 @@
             position: absolute;
             top: 55px;
             width: 30px;
-            height: 165px; /* Reaches all the way down to ground layer */
+            height: 165px;
             z-index: 8;
             display: none;
             transform-origin: top center;
@@ -755,6 +765,28 @@
                     <h3>⚡ Lightning Draw</h3>
                     <p>Watch tiny classic yellow lightning strike all the way to the ground!</p>
                 </div>
+                <div class="mode-card coming-soon">
+                    <h3>⚔️ Arena Clash</h3>
+                    <p>Coming Soon...</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>🎰 Jackpot Pull</h3>
+                    <p>Coming Soon...</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>🎯 Dart Throw</h3>
+                    <p>Coming Soon...</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>🚀 Rocket Race</h3>
+                    <p>Coming Soon...</p>
+                </div>
+            </div>
+
+            <!-- Global Scoreboard visible on selection menu if previous rounds exist -->
+            <div id="globalScoreboard" class="scoreboard" style="display: none; margin-top: 30px;">
+                <h3>📊 Cumulative Scoreboard (Active Totals)</h3>
+                <div id="globalScoreList"></div>
             </div>
         </div>
 
@@ -866,6 +898,7 @@
         let selectedGameMode = '';
         let lightningLoopTimer = null;
         let runnerMovementTimer = null;
+        let persistentScores = {}; // Stores latest points for team names across rounds
 
         function selectMode(mode) {
             selectedGameMode = mode;
@@ -918,6 +951,7 @@
         function goBackToSelection() {
             document.getElementById('mainScreen').classList.remove('active');
             document.getElementById('selectionScreen').classList.add('active');
+            document.getElementById('selectionScreen').style.display = 'block';
             
             document.getElementById('winnerBanner').style.display = 'none';
             document.getElementById('scoreboard').style.display = 'none';
@@ -927,6 +961,33 @@
             document.getElementById('lightningArena').style.display = 'none';
             document.getElementById('fateDisplay').textContent = "Ready...";
             clearLightningLoop();
+
+            updateGlobalScoreboardDisplay();
+        }
+
+        function updateGlobalScoreboardDisplay() {
+            const globalScoreboard = document.getElementById('globalScoreboard');
+            const globalScoreList = document.getElementById('globalScoreList');
+            const teamNames = Object.keys(persistentScores);
+
+            if (teamNames.length === 0) {
+                globalScoreboard.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            teamNames.forEach((name, idx) => {
+                const data = persistentScores[name];
+                html += `
+                    <div class="score-item" style="--team-color: ${data.color};">
+                        <strong>${name}</strong>
+                        <div><span class="points-won">${data.points} pts</span></div>
+                    </div>
+                `;
+            });
+
+            globalScoreList.innerHTML = html;
+            globalScoreboard.style.display = 'block';
         }
 
         function renderInputs() {
@@ -962,11 +1023,18 @@
                     header.style.gridTemplateColumns = '2fr 1fr 1fr';
                 }
 
+                // Pre-fill persistent score if available
+                let defaultName = `Team ${i + 1}`;
+                let defaultPoints = '';
+                if (persistentScores[defaultName]) {
+                    defaultPoints = persistentScores[defaultName].points;
+                }
+
                 grid.innerHTML += `
                     <div class="team-card" style="--team-color: ${teamColors[i]}; grid-template-columns: ${header.style.gridTemplateColumns};">
-                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" oninput="updateDynamicElements()">
-                        <input type="number" id="points-${i}" placeholder="Points">
-                        <input type="number" id="wager-${i}" placeholder="Wager">
+                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" value="${defaultName}" oninput="updateDynamicElements()">
+                        <input type="number" id="points-${i}" placeholder="Points" value="${defaultPoints}">
+                        <input type="number" id="wager-${i}" placeholder="Wager" value="10">
                         ${extraContent}
                     </div>
                 `;
@@ -1067,7 +1135,6 @@
         }
 
         function generateJaggedGroundPath() {
-            // Generates jagged lightning path reaching all the way to ground (165px height)
             let points = "M15,0";
             let currentX = 15;
             let currentY = 0;
@@ -1189,21 +1256,17 @@
                 const pathElement = document.getElementById('lightningPath');
                 const runner = document.getElementById('runnerCharacter');
 
-                // Helper function to pick a random spot *not* under a cloud (safe running areas)
                 const moveToRandomSafeSpot = () => {
-                    // Safe spots are between clouds or random percentages away from exact cloud centers
                     let safePos;
                     do {
-                        safePos = Math.floor(Math.random() * 80) + 10; // between 10% and 90%
+                        safePos = Math.floor(Math.random() * 80) + 10;
                     } while (teams.some((_, idx) => Math.abs(safePos - (spacing * (idx + 1))) < 7));
                     runner.style.left = `${safePos}%`;
                 };
 
-                // Runner continuously runs around randomly between safe areas
                 moveToRandomSafeSpot();
                 runnerMovementTimer = setInterval(moveToRandomSafeSpot, 600);
 
-                // Periodic false/harmless strikes under random clouds where the runner isn't
                 lightningLoopTimer = setInterval(() => {
                     const randomCloud = Math.floor(Math.random() * numTeams);
                     const strikePos = spacing * (randomCloud + 1);
@@ -1217,14 +1280,12 @@
                     }, 180);
                 }, 400);
 
-                // After 2.5 seconds, lock in the final winning strike!
                 setTimeout(() => {
                     clearInterval(lightningLoopTimer);
                     lightningLoopTimer = null;
                     clearInterval(runnerMovementTimer);
                     runnerMovementTimer = null;
 
-                    // Runner moves directly under the winning cloud for the strike
                     const winningStrikePos = spacing * (winningCloudIndex + 1);
                     runner.style.left = `${winningStrikePos}%`;
 
@@ -1270,6 +1331,8 @@
                     pointDiffHTML = `<span class="points-lost">-${team.wager} pts (Total: ${finalPoints})</span>`;
                 }
 
+                persistentScores[team.name] = { points: finalPoints, color: team.color };
+
                 scoreHTML += `
                     <div class="score-item" style="--team-color: ${team.color};">
                         <strong>${team.name}</strong>
@@ -1306,6 +1369,8 @@
                     finalPoints -= team.wager;
                     pointDiffHTML = `<span class="points-lost">-${team.wager} pts (Guessed Side ${team.diceChoice}) (Total: ${finalPoints})</span>`;
                 }
+
+                persistentScores[team.name] = { points: finalPoints, color: team.color };
 
                 scoreHTML += `
                     <div class="score-item" style="--team-color: ${team.color};">
@@ -1353,6 +1418,8 @@
                     finalPoints -= team.wager;
                     pointDiffHTML = `<span class="points-lost">-${team.wager} pts (Incorrect Cloud) (Total: ${finalPoints})</span>`;
                 }
+
+                persistentScores[team.name] = { points: finalPoints, color: team.color };
 
                 scoreHTML += `
                     <div class="score-item" style="--team-color: ${team.color};">
