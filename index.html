@@ -100,8 +100,10 @@
             z-index: 1000;
             background-color: #0b0f19;
             border: 2px solid var(--team-0);
-            padding: 30px;
-            font-size: 1.1rem;
+            padding: 40px;
+            font-size: 1.6rem;
+            line-height: 1.6;
+            color: var(--text-main);
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
             overflow-y: auto;
             display: flex;
@@ -114,8 +116,8 @@
         .prompt-box.expanded::after {
             content: 'Click anywhere or tap here to close X';
             display: block;
-            margin-top: 20px;
-            font-size: 0.85rem;
+            margin-top: 30px;
+            font-size: 1rem;
             color: var(--team-0);
             font-weight: bold;
         }
@@ -129,6 +131,12 @@
             color: var(--text-main);
             display: block;
             margin-bottom: 4px;
+        }
+
+        .prompt-box.expanded strong {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--team-0);
         }
 
         /* Selection Screen Styles */
@@ -819,7 +827,7 @@
                 </div>
             </div>
 
-            <!-- Global Scoreboard visible on selection menu if previous rounds exist -->
+            <!-- Global Scoreboard visible ONLY on selection menu if previous rounds exist -->
             <div id="globalScoreboard" class="scoreboard" style="display: none; margin-top: 30px;">
                 <h3>📊 Cumulative Scoreboard (Active Totals)</h3>
                 <div id="globalScoreList"></div>
