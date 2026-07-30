@@ -562,13 +562,14 @@
             border-radius: 50%;
         }
 
+        /* Detailed Runner Character with Visible Animated Legs */
         .runner-character {
             position: absolute;
             bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
-            width: 32px;
-            height: 48px;
+            width: 26px;
+            height: 44px;
             z-index: 10;
             transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
         }
@@ -576,38 +577,55 @@
         .runner-head {
             position: absolute;
             top: 0;
-            left: 9px;
-            width: 13px;
-            height: 13px;
+            left: 6px;
+            width: 12px;
+            height: 12px;
             background: #fdf2f8;
             border-radius: 50%;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         .runner-body {
             position: absolute;
-            top: 12px;
-            left: 10px;
-            width: 12px;
-            height: 20px;
+            top: 11px;
+            left: 7px;
+            width: 10px;
+            height: 18px;
             background: #38bdf8;
-            border-radius: 6px;
+            border-radius: 4px;
         }
-        .runner-legs {
+        .runner-leg-left, .runner-leg-right {
             position: absolute;
             bottom: 0;
-            left: 6px;
-            width: 20px;
-            height: 16px;
-            background: #e2e8f0;
-            clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
+            width: 4px;
+            height: 15px;
+            background: #cbd5e1;
+            border-radius: 2px;
+            transform-origin: top center;
+        }
+        .runner-leg-left {
+            left: 7px;
+            animation: walkLeft 0.35s infinite alternate ease-in-out;
+        }
+        .runner-leg-right {
+            right: 7px;
+            animation: walkRight 0.35s infinite alternate ease-in-out;
         }
 
-        /* Classic Yellow Tree-like Jagged Lightning Path */
+        @keyframes walkLeft {
+            0% { transform: rotate(-20deg); }
+            100% { transform: rotate(25deg); }
+        }
+        @keyframes walkRight {
+            0% { transform: rotate(25deg); }
+            100% { transform: rotate(-20deg); }
+        }
+
+        /* Tiny Classic Yellow Jagged Tree-like Lightning */
         .classic-lightning {
             position: absolute;
-            top: 52px;
-            width: 8px;
-            background: transparent;
+            top: 55px;
+            width: 30px;
+            height: 80px;
             z-index: 8;
             display: none;
             transform-origin: top center;
@@ -735,7 +753,7 @@
                 </div>
                 <div class="mode-card" onclick="selectMode('lightning')">
                     <h3>⚡ Lightning Draw</h3>
-                    <p>Watch classic yellow lightning strike over trees before hitting the runner!</p>
+                    <p>Watch tiny classic yellow lightning strike over trees before hitting the runner!</p>
                 </div>
             </div>
         </div>
@@ -813,16 +831,17 @@
                 <div class="oracle-orb" id="oracleOrb"></div>
             </div>
 
-            <!-- Lightning Draw Arena with Trees and Ground -->
+            <!-- Lightning Draw Arena with Trees, Ground, and Leggy Runner -->
             <div class="lightning-arena" id="lightningArena">
                 <div class="ground-layer"></div>
                 <div class="runner-character" id="runnerCharacter">
                     <div class="runner-head"></div>
                     <div class="runner-body"></div>
-                    <div class="runner-legs"></div>
+                    <div class="runner-leg-left"></div>
+                    <div class="runner-leg-right"></div>
                 </div>
-                <svg class="classic-lightning" id="classicLightning" viewBox="0 0 60 180" preserveAspectRatio="none">
-                    <path id="lightningPath" d="M30,0 L20,60 L40,75 L15,140 L35,150 L25,180" fill="none" stroke="#facc15" stroke-width="4" stroke-linejoin="round" filter="drop-shadow(0 0 8px #facc15)" />
+                <svg class="classic-lightning" id="classicLightning" viewBox="0 0 30 80" preserveAspectRatio="none">
+                    <path id="lightningPath" d="M15,0 L8,30 L22,38 L5,70 L18,75 L12,80" fill="none" stroke="#facc15" stroke-width="3" stroke-linejoin="round" filter="drop-shadow(0 0 5px #facc15)" />
                 </svg>
                 <div id="cloudsContainer"></div>
                 <div id="treesContainer"></div>
@@ -1046,14 +1065,14 @@
             runner.style.left = '50%';
         }
 
-        function generateJaggedTreePath() {
-            // Generates classic jagged tree-like branching lightning path coordinates
-            let points = "M30,0";
-            let currentX = 30;
+        function generateTinyJaggedPath() {
+            // Generates compact, tiny, classic yellow jagged lightning path coordinates
+            let points = "M15,0";
+            let currentX = 15;
             let currentY = 0;
-            while (currentY < 170) {
-                currentY += Math.floor(Math.random() * 25) + 15;
-                currentX += (Math.random() * 30 - 15);
+            while (currentY < 75) {
+                currentY += Math.floor(Math.random() * 12) + 8;
+                currentX += (Math.random() * 16 - 8);
                 points += ` L${currentX},${currentY}`;
             }
             return points;
@@ -1156,7 +1175,7 @@
                 }, 2500);
 
             } else if (selectedGameMode === 'lightning') {
-                fateDisplay.textContent = "⚡ Thunderstorm rolling! Lightning strikes randomly across the trees...";
+                fateDisplay.textContent = "⚡ Thunderstorm rolling! Tiny lightning flashes randomly across the trees...";
                 
                 const winningCloudIndex = Math.floor(Math.random() * numTeams);
                 const spacing = 100 / (numTeams + 1);
@@ -1168,8 +1187,8 @@
                     const randomCloud = Math.floor(Math.random() * numTeams);
                     const strikePos = spacing * (randomCloud + 1);
                     
-                    boltElement.style.left = `calc(${strikePos}% - 15px)`;
-                    pathElement.setAttribute('d', generateJaggedTreePath());
+                    boltElement.style.left = `calc(${strikePos}% - 12px)`;
+                    pathElement.setAttribute('d', generateTinyJaggedPath());
                     boltElement.style.display = 'block';
 
                     setTimeout(() => {
@@ -1177,7 +1196,7 @@
                     }, 150);
                 }, 350);
 
-                // After 2.5 seconds, the guy casually walks/moves toward where he's gonna get struck
+                // After 1 second, the guy casually walks/moves toward where he's gonna get struck
                 setTimeout(() => {
                     const runner = document.getElementById('runnerCharacter');
                     const targetLeftPos = spacing * (winningCloudIndex + 1);
@@ -1190,8 +1209,8 @@
                     lightningLoopTimer = null;
 
                     const finalStrikePos = spacing * (winningCloudIndex + 1);
-                    boltElement.style.left = `calc(${finalStrikePos}% - 15px)`;
-                    pathElement.setAttribute('d', generateJaggedTreePath());
+                    boltElement.style.left = `calc(${finalStrikePos}% - 12px)`;
+                    pathElement.setAttribute('d', generateTinyJaggedPath());
                     boltElement.style.display = 'block';
 
                     setTimeout(() => {
