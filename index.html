@@ -789,8 +789,46 @@
     <div class="container">
         <!-- SCREEN 1: Selection Menu -->
         <div id="selectionScreen" class="screen active">
+            <h1>Select Winning Mechanism</h1>
+            <div class="subtitle">Choose how you want the champion to be decided!</div>
+
+            <div class="mode-grid">
+                <div class="mode-card" onclick="selectMode('spinner')">
+                    <h3>🎡 Spinning Wheel</h3>
+                    <p>Spin the wheel of fortune to choose the winner.</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('dice')">
+                    <h3>🎲 Mystery Roll</h3>
+                    <p>Roll the dice and pick your side!</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('oracle')">
+                    <h3>🔮 Oracle Choice</h3>
+                    <p>Consult the wizard cat and its mystical orb.</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('lightning')">
+                    <h3>⚡ Lightning Draw</h3>
+                    <p>Watch tiny classic yellow lightning strike all the way to the ground!</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>⚔️ Arena Clash</h3>
+                    <p>Coming Soon...</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>🎰 Jackpot Pull</h3>
+                    <p>Coming Soon...</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>🎯 Dart Throw</h3>
+                    <p>Coming Soon...</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>🚀 Rocket Race</h3>
+                    <p>Coming Soon...</p>
+                </div>
+            </div>
+
             <!-- Global Scoreboard visible ONLY on selection menu if previous rounds exist -->
-            <div id="globalScoreboard" class="scoreboard" style="display: none; margin-top: 0;">
+            <div id="globalScoreboard" class="scoreboard" style="display: none; margin-top: 30px;">
                 <h3>📊 Cumulative Scoreboard (Active Totals)</h3>
                 <div id="globalScoreList"></div>
             </div>
@@ -973,13 +1011,10 @@
             document.getElementById('selectionScreen').classList.add('active');
             document.getElementById('selectionScreen').style.display = 'block';
             
-            document.getElementById('winnerBanner').style.display = 'none';
-            document.getElementById('scoreboard').style.display = 'none';
             document.getElementById('spinnerContainer').style.display = 'none';
             document.getElementById('diceScene').style.display = 'none';
             document.getElementById('oracleContainer').style.display = 'none';
             document.getElementById('lightningArena').style.display = 'none';
-            document.getElementById('fateDisplay').textContent = "Ready...";
             clearLightningLoop();
 
             updateGlobalScoreboardDisplay();
