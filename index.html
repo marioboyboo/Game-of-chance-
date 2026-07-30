@@ -571,7 +571,7 @@
             width: 26px;
             height: 44px;
             z-index: 10;
-            transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: left 0.5s linear;
         }
 
         .runner-head {
@@ -604,28 +604,28 @@
         }
         .runner-leg-left {
             left: 7px;
-            animation: walkLeft 0.35s infinite alternate ease-in-out;
+            animation: walkLeft 0.25s infinite alternate ease-in-out;
         }
         .runner-leg-right {
             right: 7px;
-            animation: walkRight 0.35s infinite alternate ease-in-out;
+            animation: walkRight 0.25s infinite alternate ease-in-out;
         }
 
         @keyframes walkLeft {
-            0% { transform: rotate(-20deg); }
-            100% { transform: rotate(25deg); }
+            0% { transform: rotate(-25deg); }
+            100% { transform: rotate(30deg); }
         }
         @keyframes walkRight {
-            0% { transform: rotate(25deg); }
-            100% { transform: rotate(-20deg); }
+            0% { transform: rotate(30deg); }
+            100% { transform: rotate(-25deg); }
         }
 
-        /* Tiny Classic Yellow Jagged Tree-like Lightning */
+        /* Tiny Classic Yellow Jagged Lightning Reaching Ground */
         .classic-lightning {
             position: absolute;
             top: 55px;
             width: 30px;
-            height: 80px;
+            height: 165px; /* Reaches all the way down to ground layer */
             z-index: 8;
             display: none;
             transform-origin: top center;
@@ -753,7 +753,7 @@
                 </div>
                 <div class="mode-card" onclick="selectMode('lightning')">
                     <h3>⚡ Lightning Draw</h3>
-                    <p>Watch tiny classic yellow lightning strike over trees before hitting the runner!</p>
+                    <p>Watch tiny classic yellow lightning strike all the way to the ground!</p>
                 </div>
             </div>
         </div>
@@ -840,8 +840,8 @@
                     <div class="runner-leg-left"></div>
                     <div class="runner-leg-right"></div>
                 </div>
-                <svg class="classic-lightning" id="classicLightning" viewBox="0 0 30 80" preserveAspectRatio="none">
-                    <path id="lightningPath" d="M15,0 L8,30 L22,38 L5,70 L18,75 L12,80" fill="none" stroke="#facc15" stroke-width="3" stroke-linejoin="round" filter="drop-shadow(0 0 5px #facc15)" />
+                <svg class="classic-lightning" id="classicLightning" viewBox="0 0 30 165" preserveAspectRatio="none">
+                    <path id="lightningPath" d="M15,0 L8,40 L22,70 L6,110 L20,135 L15,165" fill="none" stroke="#facc15" stroke-width="3" stroke-linejoin="round" filter="drop-shadow(0 0 6px #facc15)" />
                 </svg>
                 <div id="cloudsContainer"></div>
                 <div id="treesContainer"></div>
@@ -865,6 +865,7 @@
         let currentRotation = 0;
         let selectedGameMode = '';
         let lightningLoopTimer = null;
+        let runnerMovementTimer = null;
 
         function selectMode(mode) {
             selectedGameMode = mode;
@@ -1060,21 +1061,22 @@
                 }
             }
 
-            // Set runner to center
+            // Set runner to center initially
             const runner = document.getElementById('runnerCharacter');
             runner.style.left = '50%';
         }
 
-        function generateTinyJaggedPath() {
-            // Generates compact, tiny, classic yellow jagged lightning path coordinates
+        function generateJaggedGroundPath() {
+            // Generates jagged lightning path reaching all the way to ground (165px height)
             let points = "M15,0";
             let currentX = 15;
             let currentY = 0;
-            while (currentY < 75) {
-                currentY += Math.floor(Math.random() * 12) + 8;
-                currentX += (Math.random() * 16 - 8);
+            while (currentY < 155) {
+                currentY += Math.floor(Math.random() * 18) + 12;
+                currentX += (Math.random() * 22 - 11);
                 points += ` L${currentX},${currentY}`;
             }
+            points += " L15,165";
             return points;
         }
 
@@ -1082,6 +1084,10 @@
             if (lightningLoopTimer) {
                 clearInterval(lightningLoopTimer);
                 lightningLoopTimer = null;
+            }
+            if (runnerMovementTimer) {
+                clearInterval(runnerMovementTimer);
+                runnerMovementTimer = null;
             }
             const bolt = document.getElementById('classicLightning');
             if (bolt) bolt.style.display = 'none';
@@ -1175,50 +1181,65 @@
                 }, 2500);
 
             } else if (selectedGameMode === 'lightning') {
-                fateDisplay.textContent = "⚡ Thunderstorm rolling! Tiny lightning flashes randomly across the trees...";
+                fateDisplay.textContent = "⚡ Thunderstorm brewing! The runner dashes back and forth across the arena...";
                 
                 const winningCloudIndex = Math.floor(Math.random() * numTeams);
                 const spacing = 100 / (numTeams + 1);
                 const boltElement = document.getElementById('classicLightning');
                 const pathElement = document.getElementById('lightningPath');
+                const runner = document.getElementById('runnerCharacter');
 
-                // Continuously strike random clouds/trees until the final strike hits the runner
+                // Helper function to pick a random spot *not* under a cloud (safe running areas)
+                const moveToRandomSafeSpot = () => {
+                    // Safe spots are between clouds or random percentages away from exact cloud centers
+                    let safePos;
+                    do {
+                        safePos = Math.floor(Math.random() * 80) + 10; // between 10% and 90%
+                    } while (teams.some((_, idx) => Math.abs(safePos - (spacing * (idx + 1))) < 7));
+                    runner.style.left = `${safePos}%`;
+                };
+
+                // Runner continuously runs around randomly between safe areas
+                moveToRandomSafeSpot();
+                runnerMovementTimer = setInterval(moveToRandomSafeSpot, 600);
+
+                // Periodic false/harmless strikes under random clouds where the runner isn't
                 lightningLoopTimer = setInterval(() => {
                     const randomCloud = Math.floor(Math.random() * numTeams);
                     const strikePos = spacing * (randomCloud + 1);
                     
                     boltElement.style.left = `calc(${strikePos}% - 12px)`;
-                    pathElement.setAttribute('d', generateTinyJaggedPath());
+                    pathElement.setAttribute('d', generateJaggedGroundPath());
                     boltElement.style.display = 'block';
 
                     setTimeout(() => {
                         boltElement.style.display = 'none';
-                    }, 150);
-                }, 350);
+                    }, 180);
+                }, 400);
 
-                // After 1 second, the guy casually walks/moves toward where he's gonna get struck
-                setTimeout(() => {
-                    const runner = document.getElementById('runnerCharacter');
-                    const targetLeftPos = spacing * (winningCloudIndex + 1);
-                    runner.style.left = `${targetLeftPos}%`;
-                }, 1000);
-
-                // Final strike hits him from the correct winning cloud
+                // After 2.5 seconds, lock in the final winning strike!
                 setTimeout(() => {
                     clearInterval(lightningLoopTimer);
                     lightningLoopTimer = null;
+                    clearInterval(runnerMovementTimer);
+                    runnerMovementTimer = null;
 
-                    const finalStrikePos = spacing * (winningCloudIndex + 1);
-                    boltElement.style.left = `calc(${finalStrikePos}% - 12px)`;
-                    pathElement.setAttribute('d', generateTinyJaggedPath());
-                    boltElement.style.display = 'block';
+                    // Runner moves directly under the winning cloud for the strike
+                    const winningStrikePos = spacing * (winningCloudIndex + 1);
+                    runner.style.left = `${winningStrikePos}%`;
 
                     setTimeout(() => {
-                        boltElement.style.display = 'none';
-                        finalizeLightningResults(teams, winningCloudIndex);
-                    }, 800);
+                        boltElement.style.left = `calc(${winningStrikePos}% - 12px)`;
+                        pathElement.setAttribute('d', generateJaggedGroundPath());
+                        boltElement.style.display = 'block';
 
-                }, 2800);
+                        setTimeout(() => {
+                            boltElement.style.display = 'none';
+                            finalizeLightningResults(teams, winningCloudIndex);
+                        }, 900);
+                    }, 400);
+
+                }, 3000);
             }
         }
 
