@@ -400,7 +400,7 @@
         .dice-face-3 { transform: rotateX(90deg) translateZ(50px); }
         .dice-face-4 { transform: rotateX(-90deg) translateZ(50px); }
 
-        /* Oracle Cat Wizard Styles with Animation */
+        /* Oracle Cat Wizard Styles */
         .oracle-container {
             width: 220px;
             margin: 20px auto;
@@ -613,7 +613,7 @@
             100% { transform: scale(1.15) rotate(10deg); box-shadow: 0 0 35px #38bdf8; background: radial-gradient(circle at 30% 30%, #38bdf8, #22c55e); }
         }
 
-        /* Lightning Landscape Arena Styles with Ground & Trees */
+        /* Lightning Landscape Arena Styles */
         .lightning-arena {
             width: 100%;
             height: 250px;
@@ -706,7 +706,6 @@
             border-radius: 50%;
         }
 
-        /* Detailed Runner Character with Visible Animated Legs */
         .runner-character {
             position: absolute;
             bottom: 28px;
@@ -764,7 +763,6 @@
             100% { transform: rotate(-25deg); }
         }
 
-        /* Tiny Classic Yellow Jagged Lightning Reaching Ground */
         .classic-lightning {
             position: absolute;
             top: 55px;
@@ -775,13 +773,13 @@
             transform-origin: top center;
         }
 
-        /* Arena Clash Top-Down View: Pill-Shaped Stadium with Concentric Seating Rings & Clean Pit */
+        /* Arena Clash Top-Down View: Stadium Structure */
         .clash-arena {
             width: 100%;
             height: 330px;
-            background: #1e293b; /* Outer concourse border */
+            background: #0b0f19;
             border: 2px solid var(--border);
-            border-radius: 120px; /* Highly rounded pill stadium shape */
+            border-radius: 120px;
             position: relative;
             margin: 20px auto;
             overflow: hidden;
@@ -792,26 +790,38 @@
         /* Multi-layered concentric stadium bleacher rings */
         .stadium-rings {
             position: absolute;
-            top: 8px;
-            left: 8px;
-            right: 8px;
-            bottom: 8px;
-            border-radius: 110px;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+            border-radius: 115px;
             background: #0f172a;
             box-shadow:
-                inset 0 0 0 12px #334155, /* Outer ring 1 */
-                inset 0 0 0 24px #1e293b, /* Ring 2 */
-                inset 0 0 0 36px #334155, /* Ring 3 */
-                inset 0 0 0 48px #1e293b, /* Ring 4 */
-                inset 0 0 0 60px #475569; /* Ring 5 */
+                inset 0 0 0 12px #334155, /* Outer Ring 1 */
+                inset 0 0 0 24px #1e293b, /* Outer Ring 2 */
+                inset 0 0 0 36px #334155, /* Outer Ring 3 */
+                inset 0 0 0 48px #1e293b, /* Outer Ring 4 */
+                inset 0 0 0 60px #475569; /* Outer Ring 5 */
         }
 
-        /* Staircase Aisles cutting across bleachers (Top, Bottom, Left, Right) */
+        /* Individual Ring Track Containers for Perfect Alignment */
+        .ring-track {
+            position: absolute;
+            top: var(--ring-inset);
+            left: var(--ring-inset);
+            right: var(--ring-inset);
+            bottom: var(--ring-inset);
+            border-radius: 120px;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        /* Staircase Aisles cutting across bleachers */
         .stair-aisle {
             position: absolute;
             background: #94a3b8;
             opacity: 0.25;
-            z-index: 2;
+            z-index: 3;
         }
         .stair-top {
             top: 0;
@@ -842,20 +852,22 @@
             height: 36px;
         }
 
-        /* Crowd Spectator Dots seated in Concentric Rings */
+        /* Crowd Spectator Dots strictly aligned on lines */
         .spectator-dot {
             position: absolute;
-            width: 5px;
-            height: 5px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            z-index: 3;
-            opacity: 0.9;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+            opacity: 0.95;
+            box-shadow: 0 0 3px rgba(0,0,0,0.5);
             animation: crowdCheer 2s infinite alternate ease-in-out;
         }
 
         @keyframes crowdCheer {
-            0% { transform: scale(0.9); opacity: 0.7; }
-            100% { transform: scale(1.35); opacity: 1; }
+            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.75; }
+            100% { transform: translate(-50%, -50%) scale(1.35); opacity: 1; }
         }
 
         /* Clean, Line-Free Pill-Shaped Central Arena Pit */
@@ -866,9 +878,9 @@
             transform: translate(-50%, -50%);
             width: 62%;
             height: 165px;
-            background: radial-gradient(ellipse at center, #854d1e 0%, #683813 65%, #462309 100%); /* Clean dirt/sand arena surface */
+            background: radial-gradient(ellipse at center, #854d1e 0%, #683813 65%, #462309 100%);
             border: 4px solid #334155;
-            border-radius: 75px; /* Pill-shaped pit border */
+            border-radius: 75px;
             box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.6);
             z-index: 5;
         }
@@ -1150,7 +1162,7 @@
                 <div class="oracle-orb" id="oracleOrb"></div>
             </div>
 
-            <!-- Lightning Draw Arena with Trees, Ground, and Leggy Runner -->
+            <!-- Lightning Draw Arena -->
             <div class="lightning-arena" id="lightningArena">
                 <div class="ground-layer"></div>
                 <div class="runner-character" id="runnerCharacter">
@@ -1166,7 +1178,7 @@
                 <div id="treesContainer"></div>
             </div>
 
-            <!-- Arena Clash Top-Down View: Pill Stadium Layout with Concentric Rings, Aisles, and Clean Pit -->
+            <!-- Arena Clash Top-Down View: Stadium Layout -->
             <div class="clash-arena" id="clashArena">
                 <div class="stadium-rings" id="stadiumRings">
                     <div class="stair-aisle stair-top"></div>
@@ -1468,45 +1480,58 @@
             if (selectedGameMode !== 'clash') return;
             const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
             
-            // 1. Generate ~260 spectator crowd dots seated along the concentric seating rings around the pit
+            // 1. Generate spectator dots strictly seated directly ON top of each concentric ring line
             const crowdContainer = document.getElementById('crowdContainer');
             let crowdHTML = '';
 
-            // We generate spectators along 4 distinct concentric oval rings
-            const rings = [
-                { rx: 46, ry: 145 },
-                { rx: 43, ry: 132 },
-                { rx: 40, ry: 119 },
-                { rx: 37, ry: 106 }
-            ];
+            // Insets corresponding to the 5 seating ring border lines defined in CSS
+            const ringOffsets = [12, 24, 36, 48, 60]; 
+            const containerWidth = 640;  // Standard width of arena container
+            const containerHeight = 330; // Standard height of arena container
 
-            rings.forEach((ring, rIdx) => {
-                const totalDots = 64 - rIdx * 6;
+            ringOffsets.forEach((offset, rIdx) => {
+                // Determine dimensions of this exact concentric ring
+                const ringWidth = containerWidth - (offset * 2);
+                const ringHeight = containerHeight - (offset * 2);
+
+                const rx = ringWidth / 2;
+                const ry = ringHeight / 2;
+                const cx = containerWidth / 2;
+                const cy = containerHeight / 2;
+
+                const totalDots = 56 - (rIdx * 6);
+
                 for (let i = 0; i < totalDots; i++) {
                     const angle = (i / totalDots) * Math.PI * 2;
-                    // Skip angles that fall into the 4 staircase aisle cutouts (top, bottom, left, right)
                     const deg = (angle * 180 / Math.PI) % 360;
+
+                    // Skip dots overlapping with the 4 staircase aisles
                     if (
-                        (deg > 83 && deg < 97) ||   // Bottom aisle
-                        (deg > 263 && deg < 277) || // Top aisle
-                        (deg > 352 || deg < 8) ||   // Right aisle
-                        (deg > 172 && deg < 188)    // Left aisle
+                        (deg > 82 && deg < 98) ||   // Bottom Stairway
+                        (deg > 262 && deg < 278) || // Top Stairway
+                        (deg > 352 || deg < 8) ||   // Right Stairway
+                        (deg > 172 && deg < 188)    // Left Stairway
                     ) {
                         continue;
                     }
 
-                    const xPct = 50 + ring.rx * Math.cos(angle);
-                    const yPx = 165 + ring.ry * Math.sin(angle);
+                    // Calculate point on pill-shaped curve
+                    const xPx = cx + rx * Math.cos(angle);
+                    const yPx = cy + ry * Math.sin(angle);
+
+                    const xPct = (xPx / containerWidth) * 100;
+                    const yPct = (yPx / containerHeight) * 100;
+
                     const dotColor = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
                     const animDelay = (Math.random() * 2).toFixed(2);
 
-                    crowdHTML += `<div class="spectator-dot" style="left: ${xPct}%; top: ${yPx}px; background-color: ${dotColor}; animation-delay: ${animDelay}s;"></div>`;
+                    crowdHTML += `<div class="spectator-dot" style="left: ${xPct.toFixed(2)}%; top: ${yPct.toFixed(2)}%; background-color: ${dotColor}; animation-delay: ${animDelay}s;"></div>`;
                 }
             });
 
             crowdContainer.innerHTML = crowdHTML;
 
-            // 2. Populate fighters inside the clean, line-free central arena pit
+            // 2. Populate fighters inside the clean central arena pit
             const fightersContainer = document.getElementById('fightersContainer');
             fightersContainer.innerHTML = '';
 
@@ -1726,7 +1751,6 @@
                             const newXPct = curXPct + (Math.random() * 5 - 2.5);
                             const newYPx = curYPx + (Math.random() * 22 - 11);
                             
-                            // Keep fighters within the clean pill arena pit boundaries
                             if (newXPct > 25 && newXPct < 75) {
                                 node.style.left = `${newXPct}%`;
                             }
