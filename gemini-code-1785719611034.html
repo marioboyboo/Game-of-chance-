@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Wager Showdown - Arena Clash Deluxe</title>
+    <style>
+        :root {
+            --bg-color: #070b14;
+            --card-bg: #111827;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #1f2937;
+            
+            /* Team Unique Colors */
+            --team-0: #38bdf8; /* Blue */
+            --team-1: #f43f5e; /* Rose */
+            --team-2: #fbbf24; /* Amber */
+            --team-3: #a855f7; /* Purple */
+            --team-4: #10b981; /* Emerald */
+            --team-5: #ec4899; /* Pink */
+        }
+
+        * {
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block !important;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        /* Collapsible / Expandable Prompt Box Styles */
+        .prompt-box {
+            background-color: rgba(15, 23, 42, 0.8);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 25px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+            text-decoration: none;
+            display: block;
+            position: relative;
+            max-height: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .prompt-box.expanded {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            max-height: none;
+            z-index: 1000;
+            background-color: #0b0f19;
+            border: 2px solid var(--team-0);
+            padding: 40px;
+            font-size: 1.6rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .prompt-box.expanded::after {
+            content: 'Click anywhere or tap here to close X';
+            display: block;
+            margin-top: 30px;
+            font-size: 1rem;
+            color: var(--team-0);
+            font-weight: bold;
+        }
+
+        .prompt-box:hover {
+            border-color: var(--team-0);
+            background-color: rgba(15, 23, 42, 1);
+        }
+
+        .prompt-box strong {
+            color: var(--text-main);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .prompt-box.expanded strong {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--team-0);
+        }
+
+        /* Selection Screen Styles */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .mode-card {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .mode-card:hover {
+            border-color: var(--team-0);
+            transform: translateY(-2px);
+        }
+
+        .mode-card h3 {
+            margin-top: 0;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .mode-card p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .mode-card.coming-soon {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+        .mode-card.coming-soon:hover {
+            border-color: var(--border);
+            transform: none;
+        }
+
+        .setup-section {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .setup-section label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .team-card {
+            background-color: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+            border-left: 6px solid var(--team-color);
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .team-card-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--team-0);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--team-0), var(--team-3));
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .reset-btn {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .reset-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .scoreboard-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .spinner-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 25px auto;
+            display: none;
+        }
+
+        .spinner-wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: transform 7s cubic-bezier(0.15, 0.85, 0.15, 1);
+        }
+
+        .wheel-slice {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .slice-content {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #0f172a;
+            text-align: center;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            top: 32px;
+            left: 32px;
+        }
+
+        .spinner-pointer {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 24px solid #f8fafc;
+            z-index: 10;
+        }
+
+        /* 3D Dice Styles */
+        .dice-scene {
+            width: 100px;
+            height: 100px;
+            perspective: 600px;
+            margin: 25px auto;
+            display: none;
+        }
+
+        .dice-cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.15, 0.85, 0.15, 1);
+        }
+
+        .dice-face {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: #f8fafc;
+            color: #0f172a;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.1);
+            backface-visibility: hidden;
+            overflow: hidden;
+        }
+
+        .dice-face-1 { transform: rotateY(0deg) translateZ(50px); }
+        .dice-face-6 { transform: rotateY(180deg) translateZ(50px); }
+        .dice-face-2 { transform: rotateY(-90deg) translateZ(50px); }
+        .dice-face-5 { transform: rotateY(90deg) translateZ(50px); }
+        .dice-face-3 { transform: rotateX(90deg) translateZ(50px); }
+        .dice-face-4 { transform: rotateX(-90deg) translateZ(50px); }
+
+        /* Oracle Cat Wizard Styles */
+        .oracle-container {
+            width: 220px;
+            margin: 20px auto;
+            text-align: center;
+            display: none;
+            position: relative;
+        }
+
+        .cat-wizard-frame {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid var(--team-3);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+            position: relative;
+            background: radial-gradient(circle, #2e1065 0%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wizard-cat {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin-top: 15px;
+            animation: catIdle 3s infinite ease-in-out;
+        }
+
+        @keyframes catIdle {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-4px) rotate(1deg); }
+        }
+
+        .oracle-container.thinking .wizard-cat {
+            animation: catCasting 0.5s infinite alternate ease-in-out;
+        }
+
+        @keyframes catCasting {
+            0% { transform: translateY(-2px) rotate(-3deg) scale(0.98); }
+            100% { transform: translateY(4px) rotate(3deg) scale(1.02); }
+        }
+
+        .wizard-hat {
+            position: absolute;
+            top: -28px;
+            left: 23px;
+            width: 0;
+            height: 0;
+            border-left: 28px solid transparent;
+            border-right: 28px solid transparent;
+            border-bottom: 55px solid #7c3aed;
+            z-index: 4;
+            transform: rotate(-10deg);
+            transform-origin: bottom center;
+            animation: hatTip 4s infinite ease-in-out;
+        }
+
+        @keyframes hatTip {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(-3deg); }
+        }
+
+        .wizard-hat::after {
+            content: '';
+            position: absolute;
+            top: 45px;
+            left: -35px;
+            width: 70px;
+            height: 12px;
+            background: #6d28d9;
+            border-radius: 50%;
+        }
+
+        .cat-head {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            width: 70px;
+            height: 60px;
+            background: #e2e8f0;
+            border-radius: 35px 35px 30px 30px;
+            z-index: 2;
+        }
+
+        .cat-ear {
+            position: absolute;
+            top: -10px;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid #cbd5e1;
+            z-index: 1;
+            transform-origin: bottom center;
+        }
+        .cat-ear.left { 
+            left: 5px; 
+            transform: rotate(-15deg); 
+            animation: earTwitchLeft 5s infinite; 
+        }
+        .cat-ear.right { 
+            right: 5px; 
+            transform: rotate(15deg); 
+            animation: earTwitchRight 6s infinite; 
+        }
+
+        @keyframes earTwitchLeft {
+            0%, 90%, 100% { transform: rotate(-15deg); }
+            93% { transform: rotate(-25deg); }
+            96% { transform: rotate(-10deg); }
+        }
+
+        @keyframes earTwitchRight {
+            0%, 40%, 100% { transform: rotate(15deg); }
+            43% { transform: rotate(25deg); }
+            46% { transform: rotate(10deg); }
+        }
+
+        .cat-eyes {
+            position: absolute;
+            top: 22px;
+            left: 14px;
+            right: 14px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 3;
+        }
+        .cat-eye {
+            width: 10px;
+            height: 12px;
+            background: #0f172a;
+            border-radius: 50%;
+            position: relative;
+            animation: blink 4s infinite;
+        }
+
+        @keyframes blink {
+            0%, 45%, 55%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+
+        .cat-eye::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .cat-nose {
+            position: absolute;
+            top: 36px;
+            left: 30px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #475569;
+            z-index: 3;
+        }
+
+        .cat-paws {
+            position: absolute;
+            bottom: 5px;
+            left: 22px;
+            right: 22px;
+            height: 25px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 6;
+        }
+        .cat-paw {
+            width: 22px;
+            height: 22px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .oracle-orb {
+            width: 55px;
+            height: 55px;
+            background: radial-gradient(circle at 30% 30%, #38bdf8, #a855f7);
+            border-radius: 50%;
+            margin: -22px auto 0 auto;
+            position: relative;
+            z-index: 7;
+            box-shadow: 0 0 15px #38bdf8, inset 0 0 10px rgba(255,255,255,0.6);
+            animation: orbPulse 2.5s infinite alternate ease-in-out;
+        }
+
+        @keyframes orbPulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 10px #38bdf8, inset 0 0 8px rgba(255,255,255,0.4); }
+            100% { transform: scale(1.08); box-shadow: 0 0 25px #a855f7, inset 0 0 15px rgba(255,255,255,0.8); }
+        }
+
+        .oracle-container.thinking .oracle-orb {
+            animation: orbThinking 0.3s infinite alternate ease-in-out;
+        }
+
+        @keyframes orbThinking {
+            0% { transform: scale(0.9) rotate(-10deg); box-shadow: 0 0 20px #f43f5e; background: radial-gradient(circle at 30% 30%, #f43f5e, #a855f7); }
+            100% { transform: scale(1.15) rotate(10deg); box-shadow: 0 0 35px #38bdf8; background: radial-gradient(circle at 30% 30%, #38bdf8, #22c55e); }
+        }
+
+        /* Lightning Landscape Arena Styles */
+        .lightning-arena {
+            width: 100%;
+            height: 250px;
+            background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #030712 100%);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            position: relative;
+            margin: 20px auto;
+            overflow: hidden;
+            display: none;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .ground-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(to bottom, #166534, #14532d);
+            border-top: 2px solid #22c55e;
+            z-index: 4;
+        }
+
+        .tree-element {
+            position: absolute;
+            bottom: 28px;
+            width: 24px;
+            height: 50px;
+            z-index: 6;
+        }
+        .tree-trunk {
+            position: absolute;
+            bottom: 0;
+            left: 8px;
+            width: 8px;
+            height: 20px;
+            background: #78350f;
+            border-radius: 2px;
+        }
+        .tree-leaves {
+            position: absolute;
+            bottom: 15px;
+            left: -4px;
+            width: 32px;
+            height: 35px;
+            background: #065f46;
+            border-radius: 50% 50% 40% 40%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .storm-cloud {
+            position: absolute;
+            top: 15px;
+            width: 80px;
+            height: 42px;
+            background: var(--cloud-bg, #475569);
+            border-radius: 30px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.6), inset 0 -4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #ffffff;
+            border: 2px solid rgba(255,255,255,0.3);
+            z-index: 5;
+            transition: transform 0.3s;
+        }
+
+        .storm-cloud::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 14px;
+            width: 32px;
+            height: 32px;
+            background: var(--cloud-bg, #475569);
+            border-radius: 50%;
+        }
+
+        .storm-cloud::after {
+            content: '';
+            position: absolute;
+            top: -22px;
+            left: 36px;
+            width: 38px;
+            height: 38px;
+            background: var(--cloud-bg, #475569);
+            border-radius: 50%;
+        }
+
+        .runner-character {
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 26px;
+            height: 44px;
+            z-index: 10;
+            transition: left 0.5s linear;
+        }
+
+        .runner-head {
+            position: absolute;
+            top: 0;
+            left: 6px;
+            width: 12px;
+            height: 12px;
+            background: #fdf2f8;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .runner-body {
+            position: absolute;
+            top: 11px;
+            left: 7px;
+            width: 10px;
+            height: 18px;
+            background: #38bdf8;
+            border-radius: 4px;
+        }
+        .runner-leg-left, .runner-leg-right {
+            position: absolute;
+            bottom: 0;
+            width: 4px;
+            height: 15px;
+            background: #cbd5e1;
+            border-radius: 2px;
+            transform-origin: top center;
+        }
+        .runner-leg-left {
+            left: 7px;
+            animation: walkLeft 0.25s infinite alternate ease-in-out;
+        }
+        .runner-leg-right {
+            right: 7px;
+            animation: walkRight 0.25s infinite alternate ease-in-out;
+        }
+
+        @keyframes walkLeft {
+            0% { transform: rotate(-25deg); }
+            100% { transform: rotate(30deg); }
+        }
+        @keyframes walkRight {
+            0% { transform: rotate(30deg); }
+            100% { transform: rotate(-25deg); }
+        }
+
+        .classic-lightning {
+            position: absolute;
+            top: 55px;
+            width: 30px;
+            height: 165px;
+            z-index: 8;
+            display: none;
+            transform-origin: top center;
+        }
+
+        /* Arena Clash Top-Down View: Pill-Shaped Stadium with Concentric Seating Rings & Clean Pit */
+        .clash-arena {
+            width: 100%;
+            height: 330px;
+            background: #1e293b;
+            border: 2px solid var(--border);
+            border-radius: 120px;
+            position: relative;
+            margin: 20px auto;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.6);
+        }
+
+        /* Multi-layered concentric stadium bleacher rings */
+        .stadium-rings {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            border-radius: 110px;
+            background: #0f172a;
+            box-shadow:
+                inset 0 0 0 12px #334155, /* Outer ring 1 */
+                inset 0 0 0 24px #1e293b, /* Ring 2 */
+                inset 0 0 0 36px #334155, /* Ring 3 */
+                inset 0 0 0 48px #1e293b, /* Ring 4 */
+                inset 0 0 0 60px #475569; /* Ring 5 */
+        }
+
+        /* Staircase Aisles cutting across bleachers */
+        .stair-aisle {
+            position: absolute;
+            background: #94a3b8;
+            opacity: 0.25;
+            z-index: 4;
+        }
+        .stair-top {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px;
+            height: 60px;
+        }
+        .stair-bottom {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px;
+            height: 60px;
+        }
+        .stair-left {
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 36px;
+        }
+        .stair-right {
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 36px;
+        }
+
+        /* Crowd Spectator Dots strictly aligned on seat ring centerlines */
+        .spectator-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            z-index: 3;
+            transform: translate(-50%, -50%);
+            animation: crowdCheer 2s infinite alternate ease-in-out;
+        }
+
+        @keyframes crowdCheer {
+            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+        }
+
+        /* Clean, Line-Free Pill-Shaped Central Arena Pit */
+        .arena-pit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 62%;
+            height: 165px;
+            background: radial-gradient(ellipse at center, #854d1e 0%, #683813 65%, #462309 100%);
+            border: 4px solid #334155;
+            border-radius: 75px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.6);
+            z-index: 5;
+        }
+
+        .fighter-node {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            transition: left 0.1s linear, top 0.1s linear;
+        }
+
+        .fighter-body {
+            width: 26px;
+            height: 26px;
+            background-color: var(--fighter-color, #38bdf8);
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        .fighter-sword {
+            position: absolute;
+            width: 18px;
+            height: 6px;
+            background: #e2e8f0;
+            border: 1px solid #64748b;
+            border-radius: 2px;
+            top: 15px;
+            left: 24px;
+            transform-origin: left center;
+            animation: swordSlash 0.2s infinite alternate ease-in-out;
+        }
+
+        @keyframes swordSlash {
+            0% { transform: rotate(-25deg); }
+            100% { transform: rotate(35deg); }
+        }
+
+        .fighter-node.defeated {
+            opacity: 0.3;
+            transform: translate(-50%, -50%) scale(0.7) rotate(90deg);
+            filter: grayscale(1);
+        }
+        .fighter-node.defeated .fighter-sword {
+            animation: none;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        .fate-display {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            min-height: 30px;
+        }
+
+        .winner-banner {
+            background: linear-gradient(135deg, var(--winner-color-1, #38bdf8), var(--winner-color-2, #6366f1));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            display: none;
+            animation: popIn 0.4s ease-out forwards;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .scoreboard {
+            background-color: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+            text-align: left;
+        }
+
+        .scoreboard h3 {
+            margin: 0;
+            color: var(--text-main);
+            font-size: 1.1rem;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            background-color: rgba(15, 23, 42, 0.4);
+            border-left: 5px solid var(--team-color);
+            font-size: 0.95rem;
+        }
+
+        .points-won {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .points-lost {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-btn:hover {
+            color: var(--text-main);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .team-card, .team-card-header, .mode-grid {
+                grid-template-columns: 1fr;
+            }
+            .team-card-header {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- SCREEN 1: Selection Menu -->
+        <div id="selectionScreen" class="screen active">
+            <h1>Select Winning Mechanism</h1>
+            <div class="subtitle">Choose how you want the champion to be decided!</div>
+
+            <div class="mode-grid">
+                <div class="mode-card" onclick="selectMode('spinner')">
+                    <h3>🎡 Spinning Wheel</h3>
+                    <p>Spin the wheel of fortune to choose the winner.</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('dice')">
+                    <h3>🎲 Mystery Roll</h3>
+                    <p>Roll the dice and pick your side!</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('oracle')">
+                    <h3>🔮 Oracle Choice</h3>
+                    <p>Consult the wizard cat and its mystical orb.</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('lightning')">
+                    <h3>⚡ Lightning Draw</h3>
+                    <p>Watch tiny classic yellow lightning strike all the way to the ground!</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('clash')">
+                    <h3>⚔️ Arena Clash</h3>
+                    <p>Top-down stadium view with perfectly aligned seating rings!</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>🎰 Jackpot Pull</h3>
+                    <p>Coming Soon...</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>🎯 Dart Throw</h3>
+                    <p>Coming Soon...</p>
+                </div>
+                <div class="mode-card coming-soon">
+                    <h3>🚀 Rocket Race</h3>
+                    <p>Coming Soon...</p>
+                </div>
+            </div>
+
+            <!-- Global Scoreboard visible ONLY on selection menu if previous rounds exist -->
+            <div id="globalScoreboard" class="scoreboard" style="display: none; margin-top: 30px;">
+                <div class="scoreboard-header-row">
+                    <h3>📊 Cumulative Scoreboard</h3>
+                    <button class="reset-btn" onclick="resetScores()">Reset Scores</button>
+                </div>
+                <div id="globalScoreList"></div>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: Main Game Screen -->
+        <div id="mainScreen" class="screen">
+            <button class="back-btn" onclick="goBackToSelection()">← Back to Selection</button>
+            <h1 id="screenTitle">Team Wager Showdown</h1>
+            <div class="subtitle" id="screenSubtitle">Enter your teams, current stats, and spin the wheel to decide the champion!</div>
+
+            <div class="prompt-box" id="promptBox" onclick="togglePromptExpand(event)">
+                <strong>Original Prompt Used:</strong>
+                "Add arena clash make it so that it's a top down view of a arena with anywhere from 2-6 fighters (depending on how many teams there are) and they have swords and there's a little fight that happens then one person wins and the team that bet on that wins"
+            </div>
+
+            <div class="setup-section">
+                <label for="numTeamsSelect">Number of Teams (2 - 6)</label>
+                <select id="numTeamsSelect" onchange="renderInputs()">
+                    <option value="2">2 Teams</option>
+                    <option value="3">3 Teams</option>
+                    <option value="4" selected>4 Teams</option>
+                    <option value="5">5 Teams</option>
+                    <option value="6">6 Teams</option>
+                </select>
+            </div>
+
+            <div class="team-card-header" id="teamCardHeader">
+                <div>Team Name</div>
+                <div>Points</div>
+                <div>Wager</div>
+            </div>
+
+            <div class="team-grid" id="teamGrid"></div>
+
+            <button class="btn" id="actionBtn" onclick="runShowdown()">Spin the Wheel!</button>
+
+            <!-- Spinning Wheel Element -->
+            <div class="spinner-container" id="spinnerContainer">
+                <div class="spinner-pointer"></div>
+                <div class="spinner-wheel" id="spinnerWheel"></div>
+            </div>
+
+            <!-- 3D Dice Element -->
+            <div class="dice-scene" id="diceScene">
+                <div class="dice-cube" id="diceCube">
+                    <div class="dice-face dice-face-1">1</div>
+                    <div class="dice-face dice-face-2">2</div>
+                    <div class="dice-face dice-face-3">3</div>
+                    <div class="dice-face dice-face-4">4</div>
+                    <div class="dice-face dice-face-5">5</div>
+                    <div class="dice-face dice-face-6">6</div>
+                </div>
+            </div>
+
+            <!-- Oracle Cat Wizard Element -->
+            <div class="oracle-container" id="oracleContainer">
+                <div class="cat-wizard-frame">
+                    <div class="wizard-cat">
+                        <div class="wizard-hat"></div>
+                        <div class="cat-ear left"></div>
+                        <div class="cat-ear right"></div>
+                        <div class="cat-head">
+                            <div class="cat-eyes">
+                                <div class="cat-eye"></div>
+                                <div class="cat-eye"></div>
+                            </div>
+                            <div class="cat-nose"></div>
+                        </div>
+                        <div class="cat-paws">
+                            <div class="cat-paw"></div>
+                            <div class="cat-paw"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="oracle-orb" id="oracleOrb"></div>
+            </div>
+
+            <!-- Lightning Draw Arena -->
+            <div class="lightning-arena" id="lightningArena">
+                <div class="ground-layer"></div>
+                <div class="runner-character" id="runnerCharacter">
+                    <div class="runner-head"></div>
+                    <div class="runner-body"></div>
+                    <div class="runner-leg-left"></div>
+                    <div class="runner-leg-right"></div>
+                </div>
+                <svg class="classic-lightning" id="classicLightning" viewBox="0 0 30 165" preserveAspectRatio="none">
+                    <path id="lightningPath" d="M15,0 L8,40 L22,70 L6,110 L20,135 L15,165" fill="none" stroke="#facc15" stroke-width="3" stroke-linejoin="round" filter="drop-shadow(0 0 6px #facc15)" />
+                </svg>
+                <div id="cloudsContainer"></div>
+                <div id="treesContainer"></div>
+            </div>
+
+            <!-- Arena Clash Top-Down View: Pill Stadium Layout with Perfectly Aligned Concentric Spectators -->
+            <div class="clash-arena" id="clashArena">
+                <div class="stadium-rings" id="stadiumRings">
+                    <div class="stair-aisle stair-top"></div>
+                    <div class="stair-aisle stair-bottom"></div>
+                    <div class="stair-aisle stair-left"></div>
+                    <div class="stair-aisle stair-right"></div>
+                </div>
+                <div id="crowdContainer"></div>
+                <div class="arena-pit"></div>
+                <div id="fightersContainer"></div>
+            </div>
+
+            <div class="results-section">
+                <div id="fateDisplay" class="fate-display">The Spinner is ready...</div>
+                <div id="winnerBanner" class="winner-banner"></div>
+                
+                <div id="scoreboard" class="scoreboard">
+                    <div class="scoreboard-header-row">
+                        <h3>📊 Round Scoreboard</h3>
+                        <button class="reset-btn" onclick="resetScores()">Reset Scores</button>
+                    </div>
+                    <div id="scoreList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7', '#10b981', '#ec4899'];
+        const crowdDotColors = ['#f87171', '#fb923c', '#facc15', '#4ade80', '#38bdf8', '#818cf8', '#e879f9', '#ffffff', '#cbd5e1'];
+        const cloudPalettes = ['#475569', '#334155', '#1e293b', '#64748b', '#3b82f6', '#8b5cf6'];
+        let currentRotation = 0;
+        let selectedGameMode = '';
+        let lightningLoopTimer = null;
+        let runnerMovementTimer = null;
+        let clashIntervalTimer = null;
+        let persistentScores = {};
+
+        function togglePromptExpand(event) {
+            event.stopPropagation();
+            const box = document.getElementById('promptBox');
+            box.classList.toggle('expanded');
+        }
+
+        document.addEventListener('click', function(e) {
+            const box = document.getElementById('promptBox');
+            if (box.classList.contains('expanded') && !box.contains(e.target)) {
+                box.classList.remove('expanded');
+            }
+        });
+
+        function selectMode(mode) {
+            selectedGameMode = mode;
+            
+            document.getElementById('selectionScreen').classList.remove('active');
+            document.getElementById('selectionScreen').style.display='none';
+            document.getElementById('mainScreen').classList.add('active');
+            document.getElementById('mainScreen').style.display='block';
+
+            const spinnerContainer = document.getElementById('spinnerContainer');
+            const diceScene = document.getElementById('diceScene');
+            const oracleContainer = document.getElementById('oracleContainer');
+            const lightningArena = document.getElementById('lightningArena');
+            const clashArena = document.getElementById('clashArena');
+            const actionBtn = document.getElementById('actionBtn');
+            const screenTitle = document.getElementById('screenTitle');
+            const screenSubtitle = document.getElementById('screenSubtitle');
+
+            spinnerContainer.style.display = 'none';
+            diceScene.style.display = 'none';
+            oracleContainer.style.display = 'none';
+            oracleContainer.classList.remove('thinking');
+            lightningArena.style.display = 'none';
+            clashArena.style.display = 'none';
+            clearActiveAnimations();
+
+            if (mode === 'spinner') {
+                spinnerContainer.style.display = 'block';
+                actionBtn.textContent = 'Spin the Wheel!';
+                screenTitle.textContent = 'Team Wager Showdown';
+                screenSubtitle.textContent = 'Enter your teams, current stats, and spin the wheel to decide the champion!';
+            } else if (mode === 'dice') {
+                diceScene.style.display = 'block';
+                actionBtn.textContent = 'Roll the Dice!';
+                screenTitle.textContent = 'Mystery Roll Showdown';
+                screenSubtitle.textContent = 'Enter your teams, choose each team\'s target dice side, and roll to win!';
+            } else if (mode === 'oracle') {
+                oracleContainer.style.display = 'block';
+                actionBtn.textContent = 'Consult the Oracle Cat!';
+                screenTitle.textContent = 'Oracle Cat Showdown';
+                screenSubtitle.textContent = 'Watch the wizard cat gaze into its mystical orb to reveal the true champion!';
+            } else if (mode === 'lightning') {
+                lightningArena.style.display = 'block';
+                actionBtn.textContent = 'Unleash Storm!';
+                screenTitle.textContent = 'Lightning Draw Deluxe';
+                screenSubtitle.textContent = 'Pick which colorful storm cloud strikes the running character first!';
+            } else if (mode === 'clash') {
+                clashArena.style.display = 'block';
+                actionBtn.textContent = 'Start Arena Clash!';
+                screenTitle.textContent = 'Arena Clash Showdown';
+                screenSubtitle.textContent = 'Top-down stadium view with perfectly aligned seating rings!';
+            }
+
+            renderInputs();
+        }
+
+        function goBackToSelection() {
+            document.getElementById('mainScreen').classList.remove('active');
+            document.getElementById('selectionScreen').classList.add('active');
+            document.getElementById('selectionScreen').style.display = 'block';
+            
+            document.getElementById('spinnerContainer').style.display = 'none';
+            document.getElementById('diceScene').style.display = 'none';
+            document.getElementById('oracleContainer').style.display = 'none';
+            document.getElementById('lightningArena').style.display = 'none';
+            document.getElementById('clashArena').style.display = 'none';
+            clearActiveAnimations();
+
+            updateGlobalScoreboardDisplay();
+        }
+
+        function updateGlobalScoreboardDisplay() {
+            const globalScoreboard = document.getElementById('globalScoreboard');
+            const globalScoreList = document.getElementById('globalScoreList');
+            const teamNames = Object.keys(persistentScores);
+
+            if (teamNames.length === 0) {
+                globalScoreboard.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            teamNames.forEach((name) => {
+                const data = persistentScores[name];
+                html += `
+                    <div class="score-item" style="--team-color: ${data.color};">
+                        <strong>${name}</strong>
+                        <div><span class="points-won">${data.points} pts</span></div>
+                    </div>
+                `;
+            });
+
+            globalScoreList.innerHTML = html;
+            globalScoreboard.style.display = 'block';
+        }
+
+        function resetScores() {
+            persistentScores = {};
+            document.getElementById('globalScoreboard').style.display = 'none';
+            document.getElementById('scoreboard').style.display = 'none';
+            renderInputs();
+        }
+
+        function renderInputs() {
+            const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
+            const grid = document.getElementById('teamGrid');
+            const header = document.getElementById('teamCardHeader');
+            grid.innerHTML = '';
+
+            header.style.gridTemplateColumns = '2fr 1fr 1fr';
+
+            for (let i = 0; i < numTeams; i++) {
+                let extraContent = '';
+                if (selectedGameMode === 'dice') {
+                    header.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
+                    extraContent = `
+                        <select id="dice-choice-${i}">
+                            <option value="1">Side 1</option>
+                            <option value="2">Side 2</option>
+                            <option value="3">Side 3</option>
+                            <option value="4">Side 4</option>
+                            <option value="5">Side 5</option>
+                            <option value="6">Side 6</option>
+                        </select>
+                    `;
+                } else if (selectedGameMode === 'lightning') {
+                    header.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
+                    extraContent = `
+                        <select id="lightning-choice-${i}">
+                            <option value="${i}">Cloud ${i + 1}</option>
+                        </select>
+                    `;
+                } else {
+                    header.style.gridTemplateColumns = '2fr 1fr 1fr';
+                }
+
+                let defaultName = `Team ${i + 1}`;
+                let defaultPoints = '';
+                
+                if (persistentScores[defaultName]) {
+                    defaultPoints = persistentScores[defaultName].points;
+                }
+
+                grid.innerHTML += `
+                    <div class="team-card" style="--team-color: ${teamColors[i]}; grid-template-columns: ${header.style.gridTemplateColumns};">
+                        <input type="text" id="name-${i}" placeholder="Team ${i + 1} Name" value="${defaultName}" oninput="updateDynamicElements()">
+                        <input type="number" id="points-${i}" placeholder="Points" value="${defaultPoints}">
+                        <input type="number" id="wager-${i}" placeholder="Wager" value="10">
+                        ${extraContent}
+                    </div>
+                `;
+            }
+
+            if (selectedGameMode === 'spinner') {
+                updateWheelSlices();
+            } else if (selectedGameMode === 'lightning') {
+                updateLightningEnvironment();
+            } else if (selectedGameMode === 'clash') {
+                updateClashEnvironment();
+            }
+        }
+
+        function updateDynamicElements() {
+            if (selectedGameMode === 'spinner') {
+                updateWheelSlices();
+            } else if (selectedGameMode === 'lightning') {
+                updateLightningEnvironment();
+            } else if (selectedGameMode === 'clash') {
+                updateClashEnvironment();
+            }
+        }
+
+        function updateWheelSlices() {
+            if (selectedGameMode !== 'spinner') return;
+            const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
+            const wheel = document.getElementById('spinnerWheel');
+            wheel.innerHTML = '';
+
+            const angleStep = 360 / numTeams;
+
+            for (let i = 0; i < numTeams; i++) {
+                const nameInput = document.getElementById(`name-${i}`);
+                const teamName = (nameInput && nameInput.value.trim()) || `Team ${i + 1}`;
+                
+                const slice = document.createElement('div');
+                slice.className = 'wheel-slice';
+                slice.style.backgroundColor = teamColors[i];
+                slice.style.transform = `rotate(${i * angleStep}deg) skewY(${90 - angleStep}deg)`;
+                
+                const content = document.createElement('div');
+                content.className = 'slice-content';
+                content.id = `slice-text-${i}`;
+                content.style.transform = `skewY(${-(90 - angleStep)}deg) rotate(${angleStep / 2}deg)`;
+                content.textContent = teamName;
+
+                slice.appendChild(content);
+                wheel.appendChild(slice);
+            }
+        }
+
+        function updateLightningEnvironment() {
+            if (selectedGameMode !== 'lightning') return;
+            const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
+            const cloudsContainer = document.getElementById('cloudsContainer');
+            const treesContainer = document.getElementById('treesContainer');
+            cloudsContainer.innerHTML = '';
+            treesContainer.innerHTML = '';
+
+            const spacing = 100 / (numTeams + 1);
+
+            for (let i = 0; i < numTeams; i++) {
+                const nameInput = document.getElementById(`name-${i}`);
+                const teamName = (nameInput && nameInput.value.trim()) || `Team ${i + 1}`;
+                const leftPos = spacing * (i + 1);
+
+                const cloud = document.createElement('div');
+                cloud.className = 'storm-cloud';
+                cloud.id = `cloud-${i}`;
+                cloud.style.left = `calc(${leftPos}% - 40px)`;
+                cloud.style.setProperty('--cloud-bg', cloudPalettes[i % cloudPalettes.length]);
+                cloud.textContent = `C${i + 1}`;
+                cloud.title = teamName;
+                cloudsContainer.appendChild(cloud);
+
+                const tree = document.createElement('div');
+                tree.className = 'tree-element';
+                tree.style.left = `calc(${leftPos}% + 15px)`;
+                tree.innerHTML = '<div class="tree-trunk"></div><div class="tree-leaves"></div>';
+                treesContainer.appendChild(tree);
+
+                const selectElem = document.getElementById(`lightning-choice-${i}`);
+                if (selectElem) {
+                    selectElem.innerHTML = '';
+                    for (let c = 0; c < numTeams; c++) {
+                        const opt = document.createElement('option');
+                        opt.value = c;
+                        opt.textContent = `Cloud ${c + 1}`;
+                        if (c === i) opt.selected = true;
+                        selectElem.appendChild(opt);
+                    }
+                }
+            }
+
+            const runner = document.getElementById('runnerCharacter');
+            runner.style.left = '50%';
+        }
+
+        function updateClashEnvironment() {
+            if (selectedGameMode !== 'clash') return;
+            const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
+            
+            // 1. Generate Spectator dots EXACTLY aligned on the 5 concentric bleacher ring lines
+            const crowdContainer = document.getElementById('crowdContainer');
+            let crowdHTML = '';
+
+            // Total Arena Dimensions: 640px width x 330px height
+            // 5 Bleacher Ring Centerlines (offsets in px from outer edge to ring centers)
+            const ringCenterOffsets = [14, 26, 38, 50, 62];
+
+            const arenaW = 640;
+            const arenaH = 330;
+
+            ringCenterOffsets.forEach((off, ringIdx) => {
+                const rectW = arenaW - (off * 2);
+                const rectH = arenaH - (off * 2);
+                const r = rectH / 2; // Radius of semicircular end caps
+                const straightW = rectW - (2 * r);
+                const leftCapCenterX = off + r;
+                const rightCapCenterX = arenaW - off - r;
+                const topY = off;
+                const bottomY = arenaH - off;
+
+                // Horizontal Top & Bottom rows (avoiding top/bottom staircase aisles at center)
+                const numTopBottomDots = 28 - ringIdx * 2;
+                for (let i = 0; i <= numTopBottomDots; i++) {
+                    const x = leftCapCenterX + (straightW * (i / numTopBottomDots));
+                    // Skip if inside top/bottom aisle zone (between 295px and 345px)
+                    if (x > 295 && x < 345) continue;
+
+                    const color1 = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
+                    const color2 = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
+                    const delay1 = (Math.random() * 2).toFixed(2);
+                    const delay2 = (Math.random() * 2).toFixed(2);
+
+                    crowdHTML += `<div class="spectator-dot" style="left: ${x.toFixed(1)}px; top: ${topY}px; background-color: ${color1}; animation-delay: ${delay1}s;"></div>`;
+                    crowdHTML += `<div class="spectator-dot" style="left: ${x.toFixed(1)}px; top: ${bottomY}px; background-color: ${color2}; animation-delay: ${delay2}s;"></div>`;
+                }
+
+                // Curved Left & Right Semicircle end caps (avoiding left/right staircase aisles)
+                const numCapDots = 20 - ringIdx * 2;
+                for (let i = 0; i <= numCapDots; i++) {
+                    const angle = -Math.PI / 2 + (Math.PI * (i / numCapDots)); // Angle from top to bottom
+                    const deg = angle * (180 / Math.PI);
+                    
+                    // Skip if inside left/right aisle zone (near angle = 0, i.e., -14° to 14°)
+                    if (Math.abs(deg) < 14) continue;
+
+                    // Left Cap
+                    const lx = leftCapCenterX - (r * Math.cos(angle));
+                    const ly = (arenaH / 2) + (r * Math.sin(angle));
+
+                    // Right Cap
+                    const rx = rightCapCenterX + (r * Math.cos(angle));
+                    const ry = (arenaH / 2) + (r * Math.sin(angle));
+
+                    const colorL = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
+                    const colorR = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
+                    const delayL = (Math.random() * 2).toFixed(2);
+                    const delayR = (Math.random() * 2).toFixed(2);
+
+                    crowdHTML += `<div class="spectator-dot" style="left: ${lx.toFixed(1)}px; top: ${ly.toFixed(1)}px; background-color: ${colorL}; animation-delay: ${delayL}s;"></div>`;
+                    crowdHTML += `<div class="spectator-dot" style="left: ${rx.toFixed(1)}px; top: ${ry.toFixed(1)}px; background-color: ${colorR}; animation-delay: ${delayR}s;"></div>`;
+                }
+            });
+
+            crowdContainer.innerHTML = crowdHTML;
+
+            // 2. Populate fighters inside the clean, line-free central arena pit
+            const fightersContainer = document.getElementById('fightersContainer');
+            fightersContainer.innerHTML = '';
+
+            const stepPct = 48 / (numTeams + 1);
+
+            for (let i = 0; i < numTeams; i++) {
+                const nameInput = document.getElementById(`name-${i}`);
+                const teamName = (nameInput && nameInput.value.trim()) || `Team ${i + 1}`;
+                const xPct = 26 + stepPct * (i + 1);
+                const yPx = 165 + ((i % 2 === 0 ? -1 : 1) * 28);
+
+                const node = document.createElement('div');
+                node.className = 'fighter-node';
+                node.id = `fighter-${i}`;
+                node.style.left = `${xPct}%`;
+                node.style.top = `${yPx}px`;
+                node.innerHTML = `
+                    <div class="fighter-body" style="--fighter-color: ${teamColors[i]};" title="${teamName}">${i + 1}</div>
+                    <div class="fighter-sword"></div>
+                `;
+                fightersContainer.appendChild(node);
+            }
+        }
+
+        function generateJaggedGroundPath() {
+            let points = "M15,0";
+            let currentX = 15;
+            let currentY = 0;
+            while (currentY < 155) {
+                currentY += Math.floor(Math.random() * 18) + 12;
+                currentX += (Math.random() * 22 - 11);
+                points += ` L${currentX},${currentY}`;
+            }
+            points += " L15,165";
+            return points;
+        }
+
+        function clearActiveAnimations() {
+            if (lightningLoopTimer) {
+                clearInterval(lightningLoopTimer);
+                lightningLoopTimer = null;
+            }
+            if (runnerMovementTimer) {
+                clearInterval(runnerMovementTimer);
+                runnerMovementTimer = null;
+            }
+            if (clashIntervalTimer) {
+                clearInterval(clashIntervalTimer);
+                clashIntervalTimer = null;
+            }
+            const bolt = document.getElementById('classicLightning');
+            if (bolt) bolt.style.display = 'none';
+        }
+
+        function runShowdown() {
+            const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
+            const teams = [];
+            for (let i = 0; i < numTeams; i++) {
+                const nameInput = document.getElementById(`name-${i}`);
+                const name = nameInput.value.trim() || `Team ${i + 1}`;
+                
+                let points = 0;
+                if (persistentScores[name] !== undefined) {
+                    points = persistentScores[name].points;
+                } else {
+                    points = parseFloat(document.getElementById(`points-${i}`).value) || 0;
+                }
+
+                const wager = parseFloat(document.getElementById(`wager-${i}`).value) || 0;
+                
+                let diceChoice = 1;
+                let lightningChoice = 0;
+
+                if (selectedGameMode === 'dice') {
+                    diceChoice = parseInt(document.getElementById(`dice-choice-${i}`).value);
+                } else if (selectedGameMode === 'lightning') {
+                    lightningChoice = parseInt(document.getElementById(`lightning-choice-${i}`).value);
+                }
+
+                teams.push({ name, points, wager, diceChoice, lightningChoice, color: teamColors[i], index: i });
+            }
+
+            if (selectedGameMode === 'spinner') {
+                updateWheelSlices();
+            }
+
+            const fateDisplay = document.getElementById('fateDisplay');
+            const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            
+            winnerBanner.style.display = 'none';
+            scoreboard.style.display = 'none';
+            clearActiveAnimations();
+
+            if (selectedGameMode === 'spinner') {
+                const winningIndex = Math.floor(Math.random() * numTeams);
+                const spins = 5; 
+                const angleStep = 360 / numTeams;
+                
+                const targetDegree = currentRotation + (360 * spins) + (360 - (winningIndex * angleStep + angleStep / 2)) - (currentRotation % 360);
+                currentRotation = targetDegree;
+
+                const spinnerWheel = document.getElementById('spinnerWheel');
+                spinnerWheel.style.transform = `rotate(${currentRotation}deg)`;
+
+                fateDisplay.textContent = "The wheel is spinning...";
+
+                setTimeout(() => {
+                    finalizeWinnerResults(teams, winningIndex);
+                }, 7000);
+
+            } else if (selectedGameMode === 'dice') {
+                const rolledSide = Math.floor(Math.random() * 6) + 1;
+                fateDisplay.textContent = "🎲 Rolling the 3D dice...";
+
+                const rotations = {
+                    1: { x: 0, y: 0 },
+                    2: { x: 0, y: 90 },
+                    3: { x: -90, y: 0 },
+                    4: { x: 90, y: 0 },
+                    5: { x: 0, y: -90 },
+                    6: { x: 0, y: 180 }
+                };
+
+                const randomTumblesX = (Math.floor(Math.random() * 3) + 3) * 360;
+                const randomTumblesY = (Math.floor(Math.random() * 3) + 3) * 360;
+
+                const targetX = randomTumblesX + rotations[rolledSide].x;
+                const targetY = randomTumblesY + rotations[rolledSide].y;
+
+                const diceCube = document.getElementById('diceCube');
+                diceCube.style.transform = `rotateX(${targetX}deg) rotateY(${targetY}deg)`;
+
+                setTimeout(() => {
+                    finalizeDiceResults(teams, rolledSide);
+                }, 1600);
+
+            } else if (selectedGameMode === 'oracle') {
+                const oracleContainer = document.getElementById('oracleContainer');
+                oracleContainer.classList.add('thinking');
+                fateDisplay.textContent = "🔮 The wizard cat is gazing deeply into the orb and thinking...";
+
+                setTimeout(() => {
+                    oracleContainer.classList.remove('thinking');
+                    const winningIndex = Math.floor(Math.random() * numTeams);
+                    finalizeWinnerResults(teams, winningIndex);
+                }, 2500);
+
+            } else if (selectedGameMode === 'lightning') {
+                fateDisplay.textContent = "⚡ Thunderstorm brewing! The runner dashes back and forth across the arena...";
+                
+                const winningCloudIndex = Math.floor(Math.random() * numTeams);
+                const spacing = 100 / (numTeams + 1);
+                const boltElement = document.getElementById('classicLightning');
+                const pathElement = document.getElementById('lightningPath');
+                const runner = document.getElementById('runnerCharacter');
+
+                const moveToRandomSafeSpot = () => {
+                    let safePos;
+                    do {
+                        safePos = Math.floor(Math.random() * 80) + 10;
+                    } while (teams.some((_, idx) => Math.abs(safePos - (spacing * (idx + 1))) < 7));
+                    runner.style.left = `${safePos}%`;
+                };
+
+                moveToRandomSafeSpot();
+                runnerMovementTimer = setInterval(moveToRandomSafeSpot, 600);
+
+                lightningLoopTimer = setInterval(() => {
+                    const randomCloud = Math.floor(Math.random() * numTeams);
+                    const strikePos = spacing * (randomCloud + 1);
+                    
+                    boltElement.style.left = `calc(${strikePos}% - 12px)`;
+                    pathElement.setAttribute('d', generateJaggedGroundPath());
+                    boltElement.style.display = 'block';
+
+                    setTimeout(() => {
+                        boltElement.style.display = 'none';
+                    }, 180);
+                }, 400);
+
+                setTimeout(() => {
+                    clearInterval(lightningLoopTimer);
+                    lightningLoopTimer = null;
+                    clearInterval(runnerMovementTimer);
+                    runnerMovementTimer = null;
+
+                    const winningStrikePos = spacing * (winningCloudIndex + 1);
+                    runner.style.left = `${winningStrikePos}%`;
+
+                    setTimeout(() => {
+                        boltElement.style.left = `calc(${winningStrikePos}% - 12px)`;
+                        pathElement.setAttribute('d', generateJaggedGroundPath());
+                        boltElement.style.display = 'block';
+
+                        setTimeout(() => {
+                            boltElement.style.display = 'none';
+                            finalizeLightningResults(teams, winningCloudIndex);
+                        }, 900);
+                    }, 400);
+
+                }, 3000);
+
+            } else if (selectedGameMode === 'clash') {
+                fateDisplay.textContent = "⚔️ The fighters clash swords inside the clean arena pit!";
+                updateClashEnvironment();
+
+                const winningIndex = Math.floor(Math.random() * numTeams);
+                let activeFighters = teams.map(t => t.index);
+
+                clashIntervalTimer = setInterval(() => {
+                    activeFighters.forEach(idx => {
+                        const node = document.getElementById(`fighter-${idx}`);
+                        if (node) {
+                            const curXPct = parseFloat(node.style.left) || 50;
+                            const curYPx = parseFloat(node.style.top) || 165;
+                            const newXPct = curXPct + (Math.random() * 5 - 2.5);
+                            const newYPx = curYPx + (Math.random() * 22 - 11);
+                            
+                            if (newXPct > 25 && newXPct < 75) {
+                                node.style.left = `${newXPct}%`;
+                            }
+                            if (newYPx > 115 && newYPx < 215) {
+                                node.style.top = `${newYPx}px`;
+                            }
+                        }
+                    });
+                }, 250);
+
+                let eliminationOrder = activeFighters.filter(i => i !== winningIndex);
+                eliminationOrder.sort(() => Math.random() - 0.5);
+
+                eliminationOrder.forEach((elimIndex, step) => {
+                    setTimeout(() => {
+                        const node = document.getElementById(`fighter-${elimIndex}`);
+                        if (node) {
+                            node.classList.add('defeated');
+                        }
+                    }, (step + 1) * 700);
+                });
+
+                setTimeout(() => {
+                    clearInterval(clashIntervalTimer);
+                    clashIntervalTimer = null;
+
+                    const winnerNode = document.getElementById(`fighter-${winningIndex}`);
+                    if (winnerNode) {
+                        winnerNode.style.left = '50%';
+                        winnerNode.style.top = '165px';
+                    }
+
+                    finalizeWinnerResults(teams, winningIndex);
+                }, (eliminationOrder.length + 1) * 700 + 400);
+            }
+        }
+
+        function finalizeWinnerResults(teams, winningIndex) {
+            const winner = teams[winningIndex];
+            const fateDisplay = document.getElementById('fateDisplay');
+            const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            const scoreList = document.getElementById('scoreList');
+
+            fateDisplay.textContent = `🏆 The champion has been revealed!`;
+            
+            winnerBanner.style.display = 'block';
+            winnerBanner.style.setProperty('--winner-color-1', winner.color);
+            winnerBanner.style.setProperty('--winner-color-2', '#111827');
+            winnerBanner.innerHTML = `🎉 Champion: ${winner.name}!`;
+
+            let scoreHTML = '';
+            teams.forEach((team) => {
+                let finalPoints = team.points;
+                let pointDiffHTML = '';
+
+                if (team.index === winningIndex) {
+                    finalPoints += team.wager;
+                    pointDiffHTML = `<span class="points-won">+${team.wager} pts (Total: ${finalPoints})</span>`;
+                } else {
+                    finalPoints -= team.wager;
+                    pointDiffHTML = `<span class="points-lost">-${team.wager} pts (Total: ${finalPoints})</span>`;
+                }
+
+                persistentScores[team.name] = { points: finalPoints, color: team.color };
+
+                scoreHTML += `
+                    <div class="score-item" style="--team-color: ${team.color};">
+                        <strong>${team.name}</strong>
+                        <div>${pointDiffHTML}</div>
+                    </div>
+                `;
+            });
+
+            scoreList.innerHTML = scoreHTML;
+            scoreboard.style.display = 'block';
+            
+            teams.forEach((team, idx) => {
+                const pointsInput = document.getElementById(`points-${idx}`);
+                if (pointsInput) pointsInput.value = persistentScores[team.name].points;
+            });
+        }
+
+        function finalizeDiceResults(teams, rolledSide) {
+            const fateDisplay = document.getElementById('fateDisplay');
+            const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            const scoreList = document.getElementById('scoreList');
+
+            fateDisplay.textContent = `🎲 Dice Roll Result: Side ${rolledSide}`;
+            
+            let winnersText = [];
+            let scoreHTML = '';
+
+            teams.forEach((team) => {
+                let finalPoints = team.points;
+                let pointDiffHTML = '';
+                const isWinner = team.diceChoice === rolledSide;
+
+                if (isWinner) {
+                    finalPoints += team.wager;
+                    winnersText.push(team.name);
+                    pointDiffHTML = `<span class="points-won">+${team.wager} pts (Guessed Side ${rolledSide}) (Total: ${finalPoints})</span>`;
+                } else {
+                    finalPoints -= team.wager;
+                    pointDiffHTML = `<span class="points-lost">-${team.wager} pts (Guessed Side ${team.diceChoice}) (Total: ${finalPoints})</span>`;
+                }
+
+                persistentScores[team.name] = { points: finalPoints, color: team.color };
+
+                scoreHTML += `
+                    <div class="score-item" style="--team-color: ${team.color};">
+                        <strong>${team.name}</strong>
+                        <div>${pointDiffHTML}</div>
+                    </div>
+                `;
+            });
+
+            winnerBanner.style.display = 'block';
+            winnerBanner.style.setProperty('--winner-color-1', '#38bdf8');
+            winnerBanner.style.setProperty('--winner-color-2', '#111827');
+
+            if (winnersText.length > 0) {
+                winnerBanner.innerHTML = `🎉 Correct Predictions: ${winnersText.join(', ')}`;
+            } else {
+                winnerBanner.innerHTML = `⚠️ No teams correctly guessed Side ${rolledSide}!`;
+            }
+
+            scoreList.innerHTML = scoreHTML;
+            scoreboard.style.display = 'block';
+
+            teams.forEach((team, idx) => {
+                const pointsInput = document.getElementById(`points-${idx}`);
+                if (pointsInput) pointsInput.value = persistentScores[team.name].points;
+            });
+        }
+
+        function finalizeLightningResults(teams, winningCloudIndex) {
+            const fateDisplay = document.getElementById('fateDisplay');
+            const winnerBanner = document.getElementById('winnerBanner');
+            const scoreboard = document.getElementById('scoreboard');
+            const scoreList = document.getElementById('scoreList');
+
+            fateDisplay.textContent = `⚡ Cloud ${winningCloudIndex + 1} struck the runner!`;
+            
+            let winnersText = [];
+            let scoreHTML = '';
+
+            teams.forEach((team) => {
+                let finalPoints = team.points;
+                let pointDiffHTML = '';
+                const isWinner = team.lightningChoice === winningCloudIndex;
+
+                if (isWinner) {
+                    finalPoints += team.wager;
+                    winnersText.push(team.name);
+                    pointDiffHTML = `<span class="points-won">+${team.wager} pts (Correct Cloud) (Total: ${finalPoints})</span>`;
+                } else {
+                    finalPoints -= team.wager;
+                    pointDiffHTML = `<span class="points-lost">-${team.wager} pts (Incorrect Cloud) (Total: ${finalPoints})</span>`;
+                }
+
+                persistentScores[team.name] = { points: finalPoints, color: team.color };
+
+                scoreHTML += `
+                    <div class="score-item" style="--team-color: ${team.color};">
+                        <strong>${team.name}</strong>
+                        <div>${pointDiffHTML}</div>
+                    </div>
+                `;
+            });
+
+            winnerBanner.style.display = 'block';
+            winnerBanner.style.setProperty('--winner-color-1', '#facc15');
+            winnerBanner.style.setProperty('--winner-color-2', '#111827');
+
+            if (winnersText.length > 0) {
+                winnerBanner.innerHTML = `⚡ Successful Predictions: ${winnersText.join(', ')}`;
+            } else {
+                winnerBanner.innerHTML = `⚠️ No teams correctly predicted Cloud ${winningCloudIndex + 1}!`;
+            }
+
+            scoreList.innerHTML = scoreHTML;
+            scoreboard.style.display = 'block';
+
+            teams.forEach((team, idx) => {
+                const pointsInput = document.getElementById(`points-${idx}`);
+                if (pointsInput) pointsInput.value = persistentScores[team.name].points;
+            });
+        }
+    </script>
+</body>
+</html>
