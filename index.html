@@ -775,13 +775,13 @@
             transform-origin: top center;
         }
 
-        /* Arena Clash Top-Down View Styles: Rectangular with Rounded Edges & Audience Around Arena */
+        /* Arena Clash Top-Down View Styles: Smaller Rounder Pit with Actual Stadium Seating */
         .clash-arena {
             width: 100%;
-            height: 280px;
-            background: #1e1510; /* Outer stadium concourses */
+            height: 300px;
+            background: #140d08; /* Dark concourse background */
             border: 2px solid var(--border);
-            border-radius: 14px;
+            border-radius: 24px; /* Smooth rounded outer stadium */
             position: relative;
             margin: 20px auto;
             overflow: hidden;
@@ -789,20 +789,23 @@
             box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
         }
 
-        /* Rectangular Seating Stands / Stadium Seating Perimeter with Rounded Edges */
+        /* Tiered Bleacher Seating Stadium Stands with Rounded Pill Edges */
         .arena-stands {
             position: absolute;
             top: 10px;
             left: 10px;
             right: 10px;
             bottom: 10px;
-            border: 14px solid #3d2817; /* Wooden/Stone benches border */
-            border-radius: 20px; /* Rounded corners for the rectangular stands */
-            background: #2a1b10;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+            border: 36px solid #3d2817; /* Thicker bleachers seating area */
+            border-radius: 44px; /* Much rounder corners */
+            background: #23150c;
+            box-shadow: 
+                inset 0 0 0 6px #4a321e, /* Inner seating row border */
+                inset 0 0 0 14px #352112, /* Middle seating row border */
+                inset 0 0 25px rgba(0,0,0,0.85);
         }
 
-        /* Crowd Spectator Dots around the Rectangular Perimeter */
+        /* Crowd Spectator Dots seated along the Bleacher Rows */
         .spectator-dot {
             position: absolute;
             width: 5px;
@@ -815,21 +818,21 @@
 
         @keyframes crowdCheer {
             0% { transform: scale(1); opacity: 0.7; }
-            100% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(1.35); opacity: 1; }
         }
 
-        /* Rectangular Dirt Brown Arena Pit with Rounded Edges */
+        /* Smaller, Pill-Shaped Rounded Dirt Brown Arena Pit */
         .arena-pit {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 82%; /* Wide rectangular pit */
-            height: 170px;
+            width: 58%; /* Smaller pit footprint */
+            height: 130px; /* Smaller vertical span */
             background: radial-gradient(ellipse at center, #784722 0%, #593215 70%, #40230e 100%); /* Rich dirt brown */
             border: 4px solid #301a0a;
-            border-radius: 32px; /* Smooth rounded edges */
-            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7);
+            border-radius: 50px; /* Highly rounded pill-like corners */
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.75);
             z-index: 5;
         }
 
@@ -1011,7 +1014,7 @@
                 </div>
                 <div class="mode-card" onclick="selectMode('clash')">
                     <h3>⚔️ Arena Clash</h3>
-                    <p>Top-down view of a rounded rectangular dirt arena with seating and spectators surrounding all sides!</p>
+                    <p>Top-down view of a smaller, rounded arena pit surrounded by actual bleacher seating and crowds!</p>
                 </div>
                 <div class="mode-card coming-soon">
                     <h3>🎰 Jackpot Pull</h3>
@@ -1126,7 +1129,7 @@
                 <div id="treesContainer"></div>
             </div>
 
-            <!-- Arena Clash Top-Down View Element: Rounded Rectangle with Surrounding Spectators -->
+            <!-- Arena Clash Top-Down View Element: Smaller Rounder Pit with Surrounding Stadium Seating -->
             <div class="clash-arena" id="clashArena">
                 <div class="arena-stands" id="arenaStands"></div>
                 <div class="arena-pit"></div>
@@ -1221,7 +1224,7 @@
                 clashArena.style.display = 'block';
                 actionBtn.textContent = 'Start Arena Clash!';
                 screenTitle.textContent = 'Arena Clash Showdown';
-                screenSubtitle.textContent = 'Top-down view of a rounded rectangular dirt arena with seating and spectators surrounding all sides!';
+                screenSubtitle.textContent = 'Top-down view of a smaller, rounded arena pit surrounded by actual bleacher seating and crowds!';
             }
 
             renderInputs();
@@ -1422,38 +1425,38 @@
             if (selectedGameMode !== 'clash') return;
             const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
             
-            // 1. Populate spectator seating dots surrounding all 4 sides of the rectangular arena
+            // 1. Populate spectator seating dots along the bleacher seating rows on all 4 sides (~120 total)
             const standsContainer = document.getElementById('arenaStands');
             let spectatorsHTML = '';
             
-            // Top stand spectators (~30 dots)
-            for (let s = 0; s < 30; s++) {
-                const leftPct = 4 + Math.random() * 92;
+            // Top bleacher seats (~40 dots across seating rows)
+            for (let s = 0; s < 40; s++) {
+                const leftPct = 6 + Math.random() * 88;
                 const topPx = 14 + Math.random() * 26;
                 const dotColor = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
                 const animDelay = (Math.random() * 2).toFixed(2);
                 spectatorsHTML += `<div class="spectator-dot" style="left: ${leftPct}%; top: ${topPx}px; background-color: ${dotColor}; animation-delay: ${animDelay}s;"></div>`;
             }
-            // Bottom stand spectators (~30 dots)
-            for (let s = 0; s < 30; s++) {
-                const leftPct = 4 + Math.random() * 92;
-                const topPx = 238 + Math.random() * 24;
+            // Bottom bleacher seats (~40 dots across seating rows)
+            for (let s = 0; s < 40; s++) {
+                const leftPct = 6 + Math.random() * 88;
+                const topPx = 256 + Math.random() * 26;
                 const dotColor = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
                 const animDelay = (Math.random() * 2).toFixed(2);
                 spectatorsHTML += `<div class="spectator-dot" style="left: ${leftPct}%; top: ${topPx}px; background-color: ${dotColor}; animation-delay: ${animDelay}s;"></div>`;
             }
-            // Left stand spectators (~15 dots)
-            for (let s = 0; s < 15; s++) {
-                const leftPx = 14 + Math.random() * 24;
-                const topPx = 50 + Math.random() * 175;
+            // Left bleacher seats (~20 dots)
+            for (let s = 0; s < 20; s++) {
+                const leftPx = 14 + Math.random() * 26;
+                const topPx = 45 + Math.random() * 210;
                 const dotColor = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
                 const animDelay = (Math.random() * 2).toFixed(2);
                 spectatorsHTML += `<div class="spectator-dot" style="left: ${leftPx}px; top: ${topPx}px; background-color: ${dotColor}; animation-delay: ${animDelay}s;"></div>`;
             }
-            // Right stand spectators (~15 dots)
-            for (let s = 0; s < 15; s++) {
-                const rightPx = 14 + Math.random() * 24;
-                const topPx = 50 + Math.random() * 175;
+            // Right bleacher seats (~20 dots)
+            for (let s = 0; s < 20; s++) {
+                const rightPx = 14 + Math.random() * 26;
+                const topPx = 45 + Math.random() * 210;
                 const dotColor = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
                 const animDelay = (Math.random() * 2).toFixed(2);
                 spectatorsHTML += `<div class="spectator-dot" style="right: ${rightPx}px; top: ${topPx}px; background-color: ${dotColor}; animation-delay: ${animDelay}s;"></div>`;
@@ -1461,19 +1464,19 @@
 
             standsContainer.innerHTML = spectatorsHTML;
 
-            // 2. Populate fighters inside the rectangular dirt pit
+            // 2. Populate fighters inside the smaller, rounder dirt pit
             const fightersContainer = document.getElementById('fightersContainer');
             fightersContainer.innerHTML = '';
 
-            // Spread fighters across the rectangular pit horizontally
-            const stepPct = 68 / (numTeams + 1);
+            // Spread fighters across the 58% wide pit horizontally
+            const stepPct = 46 / (numTeams + 1);
 
             for (let i = 0; i < numTeams; i++) {
                 const nameInput = document.getElementById(`name-${i}`);
                 const teamName = (nameInput && nameInput.value.trim()) || `Team ${i + 1}`;
-                const xPct = 16 + stepPct * (i + 1);
-                // Stagger vertically within pit height (80px to 200px)
-                const yPx = 110 + ((i % 2 === 0 ? -1 : 1) * 35);
+                const xPct = 27 + stepPct * (i + 1);
+                // Stagger vertically within the smaller pit height
+                const yPx = 150 + ((i % 2 === 0 ? -1 : 1) * 24);
 
                 const node = document.createElement('div');
                 node.className = 'fighter-node';
@@ -1668,7 +1671,7 @@
                 }, 3000);
 
             } else if (selectedGameMode === 'clash') {
-                fateDisplay.textContent = "⚔️ The fighters clash swords inside the rectangular dirt arena!";
+                fateDisplay.textContent = "⚔️ The fighters clash swords inside the smaller, rounded dirt arena!";
                 updateClashEnvironment();
 
                 const winningIndex = Math.floor(Math.random() * numTeams);
@@ -1679,15 +1682,15 @@
                         const node = document.getElementById(`fighter-${idx}`);
                         if (node) {
                             const curXPct = parseFloat(node.style.left) || 50;
-                            const curYPx = parseFloat(node.style.top) || 140;
-                            const newXPct = curXPct + (Math.random() * 6 - 3);
-                            const newYPx = curYPx + (Math.random() * 28 - 14);
+                            const curYPx = parseFloat(node.style.top) || 150;
+                            const newXPct = curXPct + (Math.random() * 5 - 2.5);
+                            const newYPx = curYPx + (Math.random() * 22 - 11);
                             
-                            // Keep fighters within the rectangular dirt pit boundaries
-                            if (newXPct > 15 && newXPct < 85) {
+                            // Keep fighters within the smaller rounded dirt pit boundaries
+                            if (newXPct > 26 && newXPct < 74) {
                                 node.style.left = `${newXPct}%`;
                             }
-                            if (newYPx > 75 && newYPx < 205) {
+                            if (newYPx > 100 && newYPx < 200) {
                                 node.style.top = `${newYPx}px`;
                             }
                         }
@@ -1713,7 +1716,7 @@
                     const winnerNode = document.getElementById(`fighter-${winningIndex}`);
                     if (winnerNode) {
                         winnerNode.style.left = '50%';
-                        winnerNode.style.top = '140px';
+                        winnerNode.style.top = '150px';
                     }
 
                     finalizeWinnerResults(teams, winningIndex);
