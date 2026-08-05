@@ -772,102 +772,20 @@
             transform-origin: top center;
         }
 
-        /* Arena Clash Top-Down View: Pill-Shaped Stadium with Concentric Seating Rings & Clean Pit */
+        /* Arena Clash Background Image Container */
         .clash-arena {
             width: 100%;
             height: 330px;
-            background: #1e293b;
+            background-image: url('arena.jpeg');
+            background-size: cover;
+            background-position: center;
             border: 2px solid var(--border);
-            border-radius: 120px;
+            border-radius: 14px;
             position: relative;
             margin: 20px auto;
             overflow: hidden;
             display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.6);
-        }
-
-        /* Multi-layered concentric stadium bleacher rings */
-        .stadium-rings {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            right: 8px;
-            bottom: 8px;
-            border-radius: 110px;
-            background: #0f172a;
-            box-shadow:
-                inset 0 0 0 12px #334155, /* Outer ring 1 */
-                inset 0 0 0 24px #1e293b, /* Ring 2 */
-                inset 0 0 0 36px #334155, /* Ring 3 */
-                inset 0 0 0 48px #1e293b, /* Ring 4 */
-                inset 0 0 0 60px #475569; /* Ring 5 */
-        }
-
-        /* Staircase Aisles cutting across bleachers */
-        .stair-aisle {
-            position: absolute;
-            background: #94a3b8;
-            opacity: 0.25;
-            z-index: 4;
-        }
-        .stair-top {
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 36px;
-            height: 60px;
-        }
-        .stair-bottom {
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 36px;
-            height: 60px;
-        }
-        .stair-left {
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 60px;
-            height: 36px;
-        }
-        .stair-right {
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 60px;
-            height: 36px;
-        }
-
-        /* Crowd Spectator Dots strictly aligned on seat ring centerlines */
-        .spectator-dot {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            z-index: 3;
-            transform: translate(-50%, -50%);
-            animation: crowdCheer 2s infinite alternate ease-in-out;
-        }
-
-        @keyframes crowdCheer {
-            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; }
-            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
-        }
-
-        /* Clean, Line-Free Pill-Shaped Central Arena Pit */
-        .arena-pit {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 62%;
-            height: 165px;
-            background: radial-gradient(ellipse at center, #854d1e 0%, #683813 65%, #462309 100%);
-            border: 4px solid #334155;
-            border-radius: 75px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.6);
-            z-index: 5;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
 
         .fighter-node {
@@ -1048,7 +966,7 @@
                 </div>
                 <div class="mode-card" onclick="selectMode('clash')">
                     <h3>⚔️ Arena Clash</h3>
-                    <p>Top-down stadium view with perfectly aligned seating rings!</p>
+                    <p>Battle it out in the arena!</p>
                 </div>
                 <div class="mode-card coming-soon">
                     <h3>🎰 Jackpot Pull</h3>
@@ -1163,16 +1081,8 @@
                 <div id="treesContainer"></div>
             </div>
 
-            <!-- Arena Clash Top-Down View: Pill Stadium Layout with Perfectly Aligned Concentric Spectators -->
+            <!-- Arena Clash Image View -->
             <div class="clash-arena" id="clashArena">
-                <div class="stadium-rings" id="stadiumRings">
-                    <div class="stair-aisle stair-top"></div>
-                    <div class="stair-aisle stair-bottom"></div>
-                    <div class="stair-aisle stair-left"></div>
-                    <div class="stair-aisle stair-right"></div>
-                </div>
-                <div id="crowdContainer"></div>
-                <div class="arena-pit"></div>
                 <div id="fightersContainer"></div>
             </div>
 
@@ -1193,7 +1103,6 @@
 
     <script>
         const teamColors = ['#38bdf8', '#f43f5e', '#fbbf24', '#a855f7', '#10b981', '#ec4899'];
-        const crowdDotColors = ['#f87171', '#fb923c', '#facc15', '#4ade80', '#38bdf8', '#818cf8', '#e879f9', '#ffffff', '#cbd5e1'];
         const cloudPalettes = ['#475569', '#334155', '#1e293b', '#64748b', '#3b82f6', '#8b5cf6'];
         let currentRotation = 0;
         let selectedGameMode = '';
@@ -1264,7 +1173,7 @@
                 clashArena.style.display = 'block';
                 actionBtn.textContent = 'Start Arena Clash!';
                 screenTitle.textContent = 'Arena Clash Showdown';
-                screenSubtitle.textContent = 'Top-down stadium view with perfectly aligned seating rings!';
+                screenSubtitle.textContent = 'Fighters face off in the arena!';
             }
 
             renderInputs();
@@ -1465,73 +1374,7 @@
             if (selectedGameMode !== 'clash') return;
             const numTeams = parseInt(document.getElementById('numTeamsSelect').value);
             
-            // 1. Generate Spectator dots EXACTLY aligned on the 5 concentric bleacher ring lines
-            const crowdContainer = document.getElementById('crowdContainer');
-            let crowdHTML = '';
-
-            // Total Arena Dimensions: 640px width x 330px height
-            // 5 Bleacher Ring Centerlines (offsets in px from outer edge to ring centers)
-            const ringCenterOffsets = [14, 26, 38, 50, 62];
-
-            const arenaW = 640;
-            const arenaH = 330;
-
-            ringCenterOffsets.forEach((off, ringIdx) => {
-                const rectW = arenaW - (off * 2);
-                const rectH = arenaH - (off * 2);
-                const r = rectH / 2; // Radius of semicircular end caps
-                const straightW = rectW - (2 * r);
-                const leftCapCenterX = off + r;
-                const rightCapCenterX = arenaW - off - r;
-                const topY = off;
-                const bottomY = arenaH - off;
-
-                // Horizontal Top & Bottom rows (avoiding top/bottom staircase aisles at center)
-                const numTopBottomDots = 28 - ringIdx * 2;
-                for (let i = 0; i <= numTopBottomDots; i++) {
-                    const x = leftCapCenterX + (straightW * (i / numTopBottomDots));
-                    // Skip if inside top/bottom aisle zone (between 295px and 345px)
-                    if (x > 295 && x < 345) continue;
-
-                    const color1 = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
-                    const color2 = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
-                    const delay1 = (Math.random() * 2).toFixed(2);
-                    const delay2 = (Math.random() * 2).toFixed(2);
-
-                    crowdHTML += `<div class="spectator-dot" style="left: ${x.toFixed(1)}px; top: ${topY}px; background-color: ${color1}; animation-delay: ${delay1}s;"></div>`;
-                    crowdHTML += `<div class="spectator-dot" style="left: ${x.toFixed(1)}px; top: ${bottomY}px; background-color: ${color2}; animation-delay: ${delay2}s;"></div>`;
-                }
-
-                // Curved Left & Right Semicircle end caps (avoiding left/right staircase aisles)
-                const numCapDots = 20 - ringIdx * 2;
-                for (let i = 0; i <= numCapDots; i++) {
-                    const angle = -Math.PI / 2 + (Math.PI * (i / numCapDots)); // Angle from top to bottom
-                    const deg = angle * (180 / Math.PI);
-                    
-                    // Skip if inside left/right aisle zone (near angle = 0, i.e., -14° to 14°)
-                    if (Math.abs(deg) < 14) continue;
-
-                    // Left Cap
-                    const lx = leftCapCenterX - (r * Math.cos(angle));
-                    const ly = (arenaH / 2) + (r * Math.sin(angle));
-
-                    // Right Cap
-                    const rx = rightCapCenterX + (r * Math.cos(angle));
-                    const ry = (arenaH / 2) + (r * Math.sin(angle));
-
-                    const colorL = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
-                    const colorR = crowdDotColors[Math.floor(Math.random() * crowdDotColors.length)];
-                    const delayL = (Math.random() * 2).toFixed(2);
-                    const delayR = (Math.random() * 2).toFixed(2);
-
-                    crowdHTML += `<div class="spectator-dot" style="left: ${lx.toFixed(1)}px; top: ${ly.toFixed(1)}px; background-color: ${colorL}; animation-delay: ${delayL}s;"></div>`;
-                    crowdHTML += `<div class="spectator-dot" style="left: ${rx.toFixed(1)}px; top: ${ry.toFixed(1)}px; background-color: ${colorR}; animation-delay: ${delayR}s;"></div>`;
-                }
-            });
-
-            crowdContainer.innerHTML = crowdHTML;
-
-            // 2. Populate fighters inside the clean, line-free central arena pit
+            // Populate fighters inside the arena
             const fightersContainer = document.getElementById('fightersContainer');
             fightersContainer.innerHTML = '';
 
@@ -1736,7 +1579,7 @@
                 }, 3000);
 
             } else if (selectedGameMode === 'clash') {
-                fateDisplay.textContent = "⚔️ The fighters clash swords inside the clean arena pit!";
+                fateDisplay.textContent = "⚔️ The fighters clash swords inside the arena!";
                 updateClashEnvironment();
 
                 const winningIndex = Math.floor(Math.random() * numTeams);
