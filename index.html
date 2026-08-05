@@ -775,10 +775,13 @@
         /* Arena Clash Background Image Container */
         .clash-arena {
             width: 100%;
-            height: 330px;
+            height: auto;
+            aspect-ratio: 16 / 9; /* Maintains perfect image proportions without stretching */
             background-image: url('arena.jpeg');
-            background-size: cover;
+            background-size: contain; /* Displays 100% of the image without clipping */
+            background-repeat: no-repeat;
             background-position: center;
+            background-color: #070b14;
             border: 2px solid var(--border);
             border-radius: 14px;
             position: relative;
@@ -1384,13 +1387,13 @@
                 const nameInput = document.getElementById(`name-${i}`);
                 const teamName = (nameInput && nameInput.value.trim()) || `Team ${i + 1}`;
                 const xPct = 26 + stepPct * (i + 1);
-                const yPx = 165 + ((i % 2 === 0 ? -1 : 1) * 28);
+                const yPct = 50 + ((i % 2 === 0 ? -1 : 1) * 12);
 
                 const node = document.createElement('div');
                 node.className = 'fighter-node';
                 node.id = `fighter-${i}`;
                 node.style.left = `${xPct}%`;
-                node.style.top = `${yPx}px`;
+                node.style.top = `${yPct}%`;
                 node.innerHTML = `
                     <div class="fighter-body" style="--fighter-color: ${teamColors[i]};" title="${teamName}">${i + 1}</div>
                     <div class="fighter-sword"></div>
@@ -1590,15 +1593,15 @@
                         const node = document.getElementById(`fighter-${idx}`);
                         if (node) {
                             const curXPct = parseFloat(node.style.left) || 50;
-                            const curYPx = parseFloat(node.style.top) || 165;
+                            const curYPct = parseFloat(node.style.top) || 50;
                             const newXPct = curXPct + (Math.random() * 5 - 2.5);
-                            const newYPx = curYPx + (Math.random() * 22 - 11);
+                            const newYPct = curYPct + (Math.random() * 6 - 3);
                             
                             if (newXPct > 25 && newXPct < 75) {
                                 node.style.left = `${newXPct}%`;
                             }
-                            if (newYPx > 115 && newYPx < 215) {
-                                node.style.top = `${newYPx}px`;
+                            if (newYPct > 30 && newYPct < 70) {
+                                node.style.top = `${newYPct}%`;
                             }
                         }
                     });
@@ -1623,7 +1626,7 @@
                     const winnerNode = document.getElementById(`fighter-${winningIndex}`);
                     if (winnerNode) {
                         winnerNode.style.left = '50%';
-                        winnerNode.style.top = '165px';
+                        winnerNode.style.top = '50%';
                     }
 
                     finalizeWinnerResults(teams, winningIndex);
